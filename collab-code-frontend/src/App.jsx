@@ -8,6 +8,7 @@ import OutputPanel from './components/OutputPanel';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
 import UserWaitingPage from './components/UserWaitingPage';
+import AdminQuestionManager from './components/AdminQuestionManager';
 
 
 function UserApp() {
@@ -49,40 +50,86 @@ function UserApp() {
     };
   }, [startTime]);
 
+  useEffect(() => {
+    if (problem && problem.starterCode) {
+      setCode(problem.starterCode);
+    } else {
+      setCode('');
+    }
+  }, [problem]);
+
   const handleCodeMessage = (newCode) => setCode(newCode);
 
-  const handleUsersUpdate = (userList) => setUsers(userList);
+  const handleUsersUpdate = (userList) => {
+    console.log("Received users update:", userList); // ✅ Add this
+    setUsers(userList);
+  };
 
   const handleProblemEvents = (payload) => {
-    // console.log('Received problem event from WebSocket:', payload);
+    console.log('Received problem event from WebSocket:', payload);
+    
     if (payload.action === 'start') {
-      fetchActiveProblem().then(setProblem);
+      fetchActiveProblem().then((res) => {
+        if (!res || Object.keys(res).length === 0) {
+          setProblem(null);
+        } else {
+          setProblem(res);           // ✅ Set fetched problem
+          setStartTime(Date.now());   // ✅ Reset timer to now
+          setElapsedTime(0);          // ✅ Reset elapsed seconds
+          setFinalTime(null);         // ✅ Clear final time
+        }
+      });
     }
+    
     if (payload.action === 'clear') {
       setProblem(null);
     }
   };
 
+
   const handleJoin = () => {
     if (userName.trim() !== '') {
+      const sessionId = generateUUID();
+      sessionStorage.setItem('sessionId', sessionId);
+
       sendUserJoin(userName.trim(), problem ? problem.id : null);
+
       setJoined(true);
-      const now = Date.now();  // ✅ Define it here
-      // console.log("Starting timer at:", now);
-      setStartTime(now);       // ✅ Now this works
+      const now = Date.now();
+      setStartTime(now);
     }
   };
 
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+
   const handleRun = async () => {
-    if (!problem) return;
+    if (!problem || code.trim() === '') {
+      alert('Please write some code before running.');
+      return;
+    }
+
     const result = await executeCode(problem.id, code);
     setOutput(result);
-    if (result.success && result.testCaseResults.every(tc => tc.passed)) {
-      const final = Math.floor((Date.now() - startTime) / 1000);
-      setFinalTime(final);
-      sendUserSolved(final);
+
+    const allPassed = result?.testCaseResults?.length > 0 &&
+      result.testCaseResults.every(tc => tc.passed);
+
+    if (result.success && allPassed) {
+      const time = startTime ? Math.floor((Date.now() - startTime) / 1000) : null;
+
+      sendUserSolved(time);       // ✅ Pass the time to backend
+      setFinalTime(time);         // ✅ Store locally for current user
     }
   };
+
+
 
   const handleCodeChange = (newCode) => {
     setCode(newCode);
@@ -122,34 +169,29 @@ function UserApp() {
 
         <h3>Participants</h3>
         <ul>
-          {Object.values(users).map((user, idx) => (
-            <>
-              {console.log('Rendering user:', user)}
-              <li key={idx}>
-                {user.userName}
-                {user.solved && (
-                  <>
-                    <span style={{ color: 'green', fontWeight: 'bold' }}> 🏆 SOLVED</span>
-                    {user.finalTime !== null && (
-                      <span style={{ marginLeft: '10px', color: 'blue' }}>
-                        Time: {formatTime(user.finalTime)}
-                      </span>
-                    )}
-                  </>
-                )}
-              </li>
-            </>
+          {Object.entries(users).map(([sessionId, user]) => (
+            <li key={sessionId}>
+              {user.userName}
+              {user.solved && (
+                <>
+                  <span style={{ color: 'green', fontWeight: 'bold' }}> 🏆 SOLVED</span>
+                  {user.finalTime !== null && (
+                    <span style={{ marginLeft: '10px', color: 'blue' }}>
+                      Time: {formatTime(user.finalTime)}
+                    </span>
+                  )}
+                </>
+              )}
+            </li>
           ))}
         </ul>
-
-
       </div>
     );
   }
 
   // User has joined AND problem is active
   if (joined && problem !== null) {
-    return (
+    return (      
       <div className="App" style={{ padding: '20px' }}>
         <h1>Collaborative Code Platform</h1>
 
@@ -181,27 +223,22 @@ function UserApp() {
           >
             <h3>Participants</h3>
             <ul>
-              {Object.values(users).map((user, idx) => (
-                <>
-                  {console.log('Rendering user:', user)}
-                  <li key={idx}>
-                    {user.userName}
-                    {user.solved && (
-                      <>
-                        <span style={{ color: 'green', fontWeight: 'bold' }}> 🏆 SOLVED</span>
-                        {user.finalTime !== null && (
-                          <span style={{ marginLeft: '10px', color: 'blue' }}>
-                            Time: {formatTime(user.finalTime)}
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </li>
-                </>
+              {Object.entries(users).map(([sessionId, user]) => (
+                <li key={sessionId}>
+                  {user.userName}
+                  {user.solved && (
+                    <>
+                      <span style={{ color: 'green', fontWeight: 'bold' }}> 🏆 SOLVED</span>
+                      {user.finalTime !== null && (
+                        <span style={{ marginLeft: '10px', color: 'blue' }}>
+                          Time: {formatTime(user.finalTime)}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </li>
               ))}
             </ul>
-
-
           </div>
         </div>
       </div>
@@ -216,6 +253,7 @@ export default function App() {
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/*" element={<UserApp />} />
+        <Route path="/admin/questions" element={<AdminQuestionManager />} />
       </Routes>
     </Router>
   );

@@ -1,0 +1,37 @@
+[ {
+  "id" : 3063,
+  "title" : "Fizz buzz",
+  "description" : "Fiz buz description",
+  "starterCode" : "import java.util.Scanner;\nimport java.io.InputStream;\nimport java.io.OutputStream;\nimport java.io.PrintWriter;\n\npublic class Solution {\n    public static void solve(InputStream in, OutputStream out) {\n// write your code here\n    }\n}",
+  "testCases" : [ {
+    "input" : "1",
+    "expectedOutput" : "2"
+  }, {
+    "input" : "2",
+    "expectedOutput" : "3"
+  } ]
+}, {
+  "id" : 2852,
+  "title" : "Sum of two numbers",
+  "description" : "Write a program to add to numbers",
+  "starterCode" : "import java.util.Scanner;\nimport java.io.InputStream;\nimport java.io.OutputStream;\nimport java.io.PrintWriter;\n\npublic class Solution {\n    public static void solve(InputStream in, OutputStream out) {\n       \n    }\n}\n",
+  "testCases" : [ {
+    "input" : "2 3",
+    "expectedOutput" : "5"
+  }, {
+    "input" : "10 20",
+    "expectedOutput" : "30"
+  } ]
+}, {
+  "id" : 9846,
+  "title" : "Product of two numbers",
+  "description" : "Write a program to calculate product of two numbers",
+  "starterCode" : "import java.util.Scanner;\nimport java.io.InputStream;\nimport java.io.OutputStream;\nimport java.io.PrintWriter;\n\npublic class Solution {\n    public static void solve(InputStream in, OutputStream out) {\n    }\n}\n",
+  "testCases" : [ {
+    "input" : "2 3",
+    "expectedOutput" : "6"
+  }, {
+    "input" : "9 3",
+    "expectedOutput" : "27"
+  } ]
+} ]

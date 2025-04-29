@@ -1,12 +1,17 @@
 package com.example.collabcode.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Problem {
     private int id;
     private String title;
     private String description;
     private List<TestCase> testCases;
+    private String starterCode;
+
 
     // Getters and setters
     public int getId() {
@@ -41,16 +46,20 @@ public class Problem {
         this.testCases = testCases;
     }
 
+    public String getStarterCode() {
+        return starterCode;
+    }
+
+    public void setStarterCode(String starterCode) {
+        this.starterCode = starterCode;
+    }
+
     public static class TestCase {
         private String input;
         private String expectedOutput;
 
-        public TestCase(String s, String number) {
-            this.input = s;
-            this.expectedOutput = number;
-        }
+        public TestCase() {}
 
-        // Getters and setters
         public String getInput() {
             return input;
         }
@@ -67,4 +76,5 @@ public class Problem {
             this.expectedOutput = expectedOutput;
         }
     }
+
 }

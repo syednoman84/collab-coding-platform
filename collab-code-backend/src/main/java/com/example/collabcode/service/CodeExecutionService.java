@@ -9,7 +9,9 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CodeExecutionService {
@@ -25,16 +27,13 @@ public class CodeExecutionService {
         List<ExecutionResult.TestCaseResult> testCaseResults = new ArrayList<>();
         List<String> errors = new ArrayList<>();
 
-        // Compile the Java code
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+        StandardJavaFileManager stdFileManager = compiler.getStandardFileManager(diagnostics, null, null);
+        MemoryJavaFileManager fileManager = new MemoryJavaFileManager(stdFileManager);
 
         JavaFileObject file = new JavaSourceFromString("Solution", userCode);
-
-        Iterable<? extends JavaFileObject> compilationUnits = List.of(file);
-        JavaCompiler.CompilationTask task = compiler.getTask(null, null, diagnostics, null, null, compilationUnits);
-
-        boolean success = task.call();
+        boolean success = compiler.getTask(null, fileManager, diagnostics, null, null, List.of(file)).call();
 
         if (!success) {
             for (Diagnostic<?> diagnostic : diagnostics.getDiagnostics()) {
@@ -46,13 +45,15 @@ public class CodeExecutionService {
         }
 
         try {
-            // Load and execute compiled class
-            InMemoryClassLoader classLoader = new InMemoryClassLoader();
-            Class<?> clazz = classLoader.findClass("Solution");
+            ClassLoader classLoader = fileManager.getClassLoader(null);
+            Class<?> clazz = classLoader.loadClass("Solution");
             Method mainMethod = clazz.getMethod("solve", InputStream.class, OutputStream.class);
 
             Problem problem = problemService.getProblemById(problemId);
             if (problem != null) {
+                System.out.println("Loaded problem: " + problem.getTitle());
+                System.out.println("Test cases count: " + (problem.getTestCases() != null ? problem.getTestCases().size() : 0));
+
                 for (Problem.TestCase testCase : problem.getTestCases()) {
                     ByteArrayInputStream inputStream = new ByteArrayInputStream(testCase.getInput().getBytes());
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -69,20 +70,22 @@ public class CodeExecutionService {
                     testCaseResult.setPassed(passed);
 
                     testCaseResults.add(testCaseResult);
+                    System.out.println("Ran input: " + testCase.getInput() + ", got: " + actualOutput);
+
                 }
             }
 
             result.setSuccess(true);
             result.setTestCaseResults(testCaseResults);
-
         } catch (Exception e) {
-            errors.add(e.getMessage());
             result.setSuccess(false);
+            errors.add(e.getMessage());
             result.setErrors(errors);
         }
 
         return result;
     }
+
 
     // Helper classes
     static class JavaSourceFromString extends SimpleJavaFileObject {
@@ -113,5 +116,36 @@ public class CodeExecutionService {
                 throw new ClassNotFoundException(name);
             }
         }
+    }
+}
+
+class MemoryJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> {
+    private final Map<String, ByteArrayOutputStream> classBytes = new HashMap<>();
+
+    MemoryJavaFileManager(JavaFileManager fileManager) {
+        super(fileManager);
+    }
+
+    @Override
+    public JavaFileObject getJavaFileForOutput(Location location, String className, JavaFileObject.Kind kind, FileObject sibling) {
+        return new SimpleJavaFileObject(URI.create("mem:///" + className + kind.extension), kind) {
+            @Override
+            public OutputStream openOutputStream() {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                classBytes.put(className, baos);
+                return baos;
+            }
+        };
+    }
+
+    @Override
+    public ClassLoader getClassLoader(Location location) {
+        return new ClassLoader() {
+            @Override
+            protected Class<?> findClass(String name) {
+                byte[] bytes = classBytes.get(name).toByteArray();
+                return defineClass(name, bytes, 0, bytes.length);
+            }
+        };
     }
 }

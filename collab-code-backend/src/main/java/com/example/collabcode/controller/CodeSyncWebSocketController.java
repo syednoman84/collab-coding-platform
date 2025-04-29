@@ -62,7 +62,7 @@ public class CodeSyncWebSocketController {
             Map<String, Object> userMap = new HashMap<>();
             userMap.put("userName", session.userName);
             userMap.put("solved", session.solved);
-            userMap.put("finalTime", session.finalTime); // ✅ Add this line
+            userMap.put("finalTime", session.finalTime);
             users.put(entry.getKey(), userMap);
         }
         messagingTemplate.convertAndSend("/topic/users", users);

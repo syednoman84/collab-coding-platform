@@ -15,8 +15,17 @@ export async function executeCode(problemId, code) {
   return res.data;
 }
 
-export async function fetchActiveProblem() {
-    const res = await axios.get(`${API_BASE_URL}/problem/active`);
-    return res.data;
+// export async function fetchActiveProblem() {
+//     const res = await axios.get(`${API_BASE_URL}/problem/active`);
+//     return res.data;
+//   }
+
+  export async function fetchActiveProblem() {
+    const res = await fetch(`${API_BASE_URL}/questions/active`);
+    if (res.ok) {
+      return await res.json();
+    }
+    return null;
   }
+  
   

@@ -30,10 +30,14 @@ public class SessionManager {
 
     public void markSolved(String sessionId, Integer finalTime) {
         UserSession session = sessions.get(sessionId);
-        if (session != null) {
+        if (session == null) {
+            System.out.println("No session found for sessionId: " + sessionId);
+        } else {
             session.solved = true;
-            session.finalTime = finalTime;  // ✅ save final time!
+            session.finalTime = finalTime;
+            System.out.println("Marked as solved: " + session.userName + ", time: " + finalTime);
         }
+
     }
 
     public void removeSession(String sessionId) {
