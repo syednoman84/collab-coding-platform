@@ -1,11 +1,10 @@
 package com.example.collabcode.service;
 
 import com.example.collabcode.model.Problem;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.core.type.TypeReference;
-
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,32 +21,6 @@ public class ProblemService {
 
     private Integer activeProblemId = null;
 
-
-//    public ProblemService() {
-//        // Load problems into memory
-//
-////        Problem p1 = new Problem();
-////        p1.setId(1);
-////        p1.setTitle("Add Two Numbers");
-////        p1.setDescription("Given two integers, return their sum.");
-////        p1.setTestCases(List.of(
-////                new Problem.TestCase("2 3", "5"),
-////                new Problem.TestCase("10 15", "25")
-////        ));
-////
-////        Problem p2 = new Problem();
-////        p2.setId(2);
-////        p2.setTitle("Multiply Two Numbers");
-////        p2.setDescription("Given two integers, return their product.");
-////        p2.setTestCases(List.of(
-////                new Problem.TestCase("2 3", "6"),
-////                new Problem.TestCase("10 5", "50")
-////        ));
-////
-////        problems.add(p1);
-////        problems.add(p2);
-//    }
-
     public Problem getProblemById(int id) {
         return problems.stream().filter(p -> p.getId() == id).findFirst().orElse(null);
     }
@@ -61,11 +34,16 @@ public class ProblemService {
     }
 
     public void setActiveProblemId(Integer id) {
-        activeProblemId = id;
+        this.activeProblemId = id;
     }
 
     public void clearActiveProblem() {
-        activeProblemId = null;
+        this.activeProblemId = null;
+    }
+
+    public Problem getActiveProblem() {
+        if (activeProblemId == null) return null;
+        return getProblemById(activeProblemId);
     }
 
     @PostConstruct
@@ -73,15 +51,36 @@ public class ProblemService {
         try {
             if (Files.exists(filePath)) {
                 ObjectMapper mapper = new ObjectMapper();
-                List<Problem> loaded = mapper.readValue(Files.readAllBytes(filePath),
-                        new TypeReference<List<Problem>>() {});
+                List<Problem> loaded = mapper.readValue(
+                        Files.readAllBytes(filePath),
+                        new TypeReference<List<Problem>>() {}
+                );
                 problems.clear();
                 problems.addAll(loaded);
-                System.out.println("Loaded " + problems.size() + " problems from questions.json");
+
+                System.out.println("✅ Loaded " + problems.size() + " problems from questions.json");
+                System.out.println("✅ Loaded Problems: \n" + problems.get(0).getId());
+
+
+                // ✅ Validate loaded problems (optional)
+                for (Problem problem : problems) {
+                    if (problem.getClassName() == null) {
+                        problem.setClassName("Solution");
+                    }
+                    if (problem.getMethodName() == null) {
+                        problem.setMethodName("solve");
+                    }
+                    if (problem.getParameters() == null) {
+                        problem.setParameters(new ArrayList<>());
+                    }
+                    if (problem.getReturnType() == null) {
+                        problem.setReturnType("void");
+                    }
+                }
             }
         } catch (IOException e) {
-            System.err.println("Failed to load questions.json: " + e.getMessage());
+            System.err.println("❌ Failed to load questions.json: " + e.getMessage());
         }
     }
-
 }
+

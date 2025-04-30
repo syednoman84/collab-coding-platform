@@ -9,6 +9,11 @@ public class Question {
     private String starterCode;
     private List<TestCase> testCases;
 
+    private String className;
+    private String methodName;
+    private String returnType;
+    private List<String> parameters;
+
     public static class TestCase {
         private String input;
         private String expectedOutput;
@@ -47,4 +52,36 @@ public class Question {
 
     public List<TestCase> getTestCases() { return testCases; }
     public void setTestCases(List<TestCase> testCases) { this.testCases = testCases; }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
+    }
+
+    public List<String> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(List<String> parameters) {
+        this.parameters = parameters;
+    }
 }

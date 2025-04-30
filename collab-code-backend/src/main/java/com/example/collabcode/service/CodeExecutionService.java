@@ -2,16 +2,19 @@ package com.example.collabcode.service;
 
 import com.example.collabcode.model.ExecutionResult;
 import com.example.collabcode.model.Problem;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.springframework.stereotype.Service;
 
 import javax.tools.*;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class CodeExecutionService {
@@ -27,14 +30,24 @@ public class CodeExecutionService {
         List<ExecutionResult.TestCaseResult> testCaseResults = new ArrayList<>();
         List<String> errors = new ArrayList<>();
 
+        Problem problem = problemService.getProblemById(problemId);
+        System.out.println("Problem ID received: " + problemId);
+        System.out.println("Available IDs: " + problemService.getAllProblems().stream().map(Problem::getId).toList());
+
+        if (problem == null) {
+            result.setSuccess(false);
+            errors.add("Problem not found.");
+            result.setErrors(errors);
+            return result;
+        }
+
+        String fullSource = userCode;
+        JavaFileObject file = new JavaSourceFromString(problem.getClassName(), fullSource);
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        StandardJavaFileManager stdFileManager = compiler.getStandardFileManager(diagnostics, null, null);
-        MemoryJavaFileManager fileManager = new MemoryJavaFileManager(stdFileManager);
+        JavaCompiler.CompilationTask task = compiler.getTask(null, null, diagnostics, null, null, List.of(file));
 
-        JavaFileObject file = new JavaSourceFromString("Solution", userCode);
-        boolean success = compiler.getTask(null, fileManager, diagnostics, null, null, List.of(file)).call();
-
+        boolean success = task.call();
         if (!success) {
             for (Diagnostic<?> diagnostic : diagnostics.getDiagnostics()) {
                 errors.add(diagnostic.getMessage(null));
@@ -45,47 +58,125 @@ public class CodeExecutionService {
         }
 
         try {
-            ClassLoader classLoader = fileManager.getClassLoader(null);
-            Class<?> clazz = classLoader.loadClass("Solution");
-            Method mainMethod = clazz.getMethod("solve", InputStream.class, OutputStream.class);
+            InMemoryClassLoader classLoader = new InMemoryClassLoader();
+            Class<?> clazz = classLoader.findClass(problem.getClassName());
 
-            Problem problem = problemService.getProblemById(problemId);
-            if (problem != null) {
-                System.out.println("Loaded problem: " + problem.getTitle());
-                System.out.println("Test cases count: " + (problem.getTestCases() != null ? problem.getTestCases().size() : 0));
+            Object instance = clazz.getDeclaredConstructor().newInstance();
 
-                for (Problem.TestCase testCase : problem.getTestCases()) {
-                    ByteArrayInputStream inputStream = new ByteArrayInputStream(testCase.getInput().getBytes());
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            Class<?>[] paramTypes = parseParameterTypes(problem.getParameters());
+            Method method = clazz.getMethod(problem.getMethodName(), paramTypes);
 
-                    mainMethod.invoke(null, inputStream, outputStream);
+            for (Problem.TestCase testCase : problem.getTestCases()) {
+                Object[] args = parseArguments(testCase.getInput(), problem.getParameters());
 
-                    String actualOutput = outputStream.toString().trim();
-                    boolean passed = actualOutput.equals(testCase.getExpectedOutput());
-
-                    ExecutionResult.TestCaseResult testCaseResult = new ExecutionResult.TestCaseResult();
-                    testCaseResult.setInput(testCase.getInput());
-                    testCaseResult.setExpectedOutput(testCase.getExpectedOutput());
-                    testCaseResult.setActualOutput(actualOutput);
-                    testCaseResult.setPassed(passed);
-
-                    testCaseResults.add(testCaseResult);
-                    System.out.println("Ran input: " + testCase.getInput() + ", got: " + actualOutput);
-
+                if (args.length != paramTypes.length) {
+                    throw new IllegalArgumentException("Expected " + paramTypes.length + " arguments but got " + args.length);
                 }
+
+                Object actual = method.invoke(instance, args);
+
+                String actualOutput = serializeOutput(actual);
+                String expected = normalizeJsonString(testCase.getExpectedOutput());
+                String actualNorm = normalizeJsonString(actualOutput);
+
+                boolean passed = expected.equals(actualNorm);
+
+                ExecutionResult.TestCaseResult tc = new ExecutionResult.TestCaseResult();
+                tc.setInput(testCase.getInput());
+                tc.setExpectedOutput(testCase.getExpectedOutput());
+                tc.setActualOutput(actualOutput);
+                tc.setPassed(passed);
+
+                testCaseResults.add(tc);
             }
 
             result.setSuccess(true);
             result.setTestCaseResults(testCaseResults);
+
         } catch (Exception e) {
+            e.printStackTrace();
+            errors.add("Execution failed: " + e.getClass().getSimpleName() + ": " + e.getMessage());
             result.setSuccess(false);
-            errors.add(e.getMessage());
             result.setErrors(errors);
         }
 
         return result;
     }
 
+    private Class<?>[] parseParameterTypes(List<String> paramDefs) throws ClassNotFoundException {
+        List<Class<?>> types = new ArrayList<>();
+        for (String def : paramDefs) {
+            String typeOnly = def.trim().split("\\s+")[0];
+            switch (typeOnly) {
+                case "int" -> types.add(int.class);
+                case "int[]" -> types.add(int[].class);
+                case "String" -> types.add(String.class);
+                case "String[]" -> types.add(String[].class);
+                case "double" -> types.add(double.class);
+                case "double[]" -> types.add(double[].class);
+                case "boolean" -> types.add(boolean.class);
+                case "List<Integer>", "List<String>", "Map<String,Integer>" -> types.add(Object.class);
+                default -> throw new IllegalArgumentException("Unsupported param type: " + typeOnly);
+            }
+        }
+        return types.toArray(new Class<?>[0]);
+    }
+
+    private Object[] parseArguments(String jsonInput, List<String> paramDefs) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode inputArray = mapper.readTree(jsonInput);
+
+        if (!inputArray.isArray()) {
+            throw new IllegalArgumentException("Input must be a JSON array of arguments.");
+        }
+
+        if (inputArray.size() != paramDefs.size()) {
+            throw new IllegalArgumentException("Expected " + paramDefs.size() + " arguments, but got " + inputArray.size());
+        }
+
+        Object[] args = new Object[paramDefs.size()];
+
+        for (int i = 0; i < paramDefs.size(); i++) {
+            String typeOnly = paramDefs.get(i).trim().split("\\s+")[0];
+            JsonNode argNode = inputArray.get(i);
+
+            switch (typeOnly) {
+                case "int[]" -> {
+                    List<Integer> intList = mapper.convertValue(argNode, new TypeReference<List<Integer>>() {});
+                    args[i] = intList.stream().mapToInt(Integer::intValue).toArray();
+                }
+                case "double[]" -> {
+                    List<Double> dblList = mapper.convertValue(argNode, new TypeReference<List<Double>>() {});
+                    args[i] = dblList.stream().mapToDouble(Double::doubleValue).toArray();
+                }
+                case "String[]" -> {
+                    List<String> strList = mapper.convertValue(argNode, new TypeReference<List<String>>() {});
+                    args[i] = strList.toArray(new String[0]);
+                }
+                case "List<Integer>" -> args[i] = mapper.convertValue(argNode, TypeFactory.defaultInstance().constructCollectionType(List.class, Integer.class));
+                case "List<String>" -> args[i] = mapper.convertValue(argNode, TypeFactory.defaultInstance().constructCollectionType(List.class, String.class));
+                case "Map<String,Integer>" -> args[i] = mapper.convertValue(argNode, TypeFactory.defaultInstance().constructMapType(Map.class, String.class, Integer.class));
+                case "int" -> args[i] = mapper.treeToValue(argNode, int.class);
+                case "double" -> args[i] = mapper.treeToValue(argNode, double.class);
+                case "boolean" -> args[i] = mapper.treeToValue(argNode, boolean.class);
+                case "String" -> args[i] = mapper.treeToValue(argNode, String.class);
+                default -> args[i] = mapper.treeToValue(argNode, Object.class);
+            }
+        }
+
+        return args;
+    }
+
+    private String serializeOutput(Object result) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(result);
+    }
+
+    private String normalizeJsonString(String json) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode normalized = mapper.readTree(json);
+        return mapper.writeValueAsString(normalized);
+    }
 
     // Helper classes
     static class JavaSourceFromString extends SimpleJavaFileObject {

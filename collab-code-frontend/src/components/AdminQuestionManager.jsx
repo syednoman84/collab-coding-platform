@@ -2,14 +2,27 @@ import { useState, useEffect } from 'react';
 
 const API_BASE_URL = 'http://192.168.1.196:8080/api/questions'; // Adjust to your backend URL
 
+function generateStarterCode(className, methodName, parameters, returnType) {
+    const paramList = parameters.join(', ');
+    return `public class ${className} {
+      public ${returnType} ${methodName}(${paramList}) {
+          // your code here
+      }
+  }`;
+}
+
 export default function AdminQuestionManager() {
     const [questions, setQuestions] = useState([]);
     const [editingQuestion, setEditingQuestion] = useState(null);
     const [newQuestion, setNewQuestion] = useState({
         title: '',
         description: '',
+        className: 'Solution',
+        methodName: '',
+        returnType: '',
+        parameters: '',
         starterCode: '',
-        testCases: [{ input: '', output: '' }]
+        testCases: [{ input: '', expectedOutput: '' }]
     });
     const [showForm, setShowForm] = useState(false);
 
@@ -30,7 +43,16 @@ export default function AdminQuestionManager() {
 
     const handleEdit = (question) => {
         setEditingQuestion(question);
-        setNewQuestion(question);
+        setNewQuestion({
+            title: question.title || '',
+            description: question.description || '',
+            className: question.className || 'Solution',
+            methodName: question.methodName || '',
+            returnType: question.returnType || '',
+            parameters: question.parameters?.join(', ') || '',
+            starterCode: question.starterCode || '',
+            testCases: question.testCases || [{ input: '', expectedOutput: '' }]
+        });
         setShowForm(true);
     };
 
@@ -39,8 +61,12 @@ export default function AdminQuestionManager() {
         setNewQuestion({
             title: '',
             description: '',
+            className: 'Solution',
+            methodName: '',
+            returnType: '',
+            parameters: '',
             starterCode: '',
-            testCases: [{ input: '', output: '' }]
+            testCases: [{ input: '', expectedOutput: '' }]
         });
         setShowForm(true);
     };
@@ -49,10 +75,20 @@ export default function AdminQuestionManager() {
         e.preventDefault();
         const method = editingQuestion ? 'PUT' : 'POST';
         const url = editingQuestion ? `${API_BASE_URL}/${editingQuestion.id}` : API_BASE_URL;
+        const payload = {
+            ...newQuestion,
+            parameters: newQuestion.parameters.split(',').map(p => p.trim()),
+            testCases: newQuestion.testCases.map(tc => ({
+                input: tc.input,
+                expectedOutput: tc.expectedOutput
+            }))
+        };
+        console.log("Submitting payload:", payload);
+
         await fetch(url, {
             method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newQuestion)
+            body: JSON.stringify(payload)
         });
         setShowForm(false);
         fetchQuestions();
@@ -65,19 +101,42 @@ export default function AdminQuestionManager() {
     };
 
     const addTestCaseField = () => {
-        setNewQuestion({ ...newQuestion, testCases: [...newQuestion.testCases, { input: '', output: '' }] });
+        setNewQuestion({ ...newQuestion, testCases: [...newQuestion.testCases, { input: '', expectedOutput: '' }] });
     };
 
     const handleActivate = async (id) => {
         await fetch(`${API_BASE_URL}/activate/${id}`, { method: 'POST' });
         alert('Question activated!');
-      };
-      
-      const handleClearActive = async () => {
+    };
+
+    const handleClearActive = async () => {
         await fetch(`${API_BASE_URL}/clear`, { method: 'POST' });
         alert('Active question cleared!');
-      };
-      
+    };
+
+    function handleInputChange(e) {
+        const { name, value } = e.target;
+        const updated = { ...newQuestion, [name]: value };
+
+        const allFilled =
+            updated.className &&
+            updated.methodName &&
+            updated.returnType &&
+            updated.parameters;
+
+        if (["className", "methodName", "returnType", "parameters"].includes(name) && allFilled) {
+            const paramList = updated.parameters.split(',').map(p => p.trim());
+            updated.starterCode = generateStarterCode(
+                updated.className,
+                updated.methodName,
+                paramList,
+                updated.returnType
+            );
+        }
+
+        setNewQuestion(updated);
+    }
+
     return (
         <div style={{ padding: '20px' }}>
             <h1>Admin Question Management</h1>
@@ -92,7 +151,6 @@ export default function AdminQuestionManager() {
                         <button onClick={() => handleEdit(q)} style={{ marginLeft: '10px' }}>✏️ Edit</button>
                         <button onClick={() => handleDelete(q.id)} style={{ marginLeft: '10px' }}>🗑 Delete</button>
                         <button onClick={() => handleActivate(q.id)} style={{ marginLeft: '10px' }}>🚀 Activate</button>
-
                     </li>
                 ))}
             </ul>
@@ -100,47 +158,38 @@ export default function AdminQuestionManager() {
             {showForm && (
                 <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
                     <h3>{editingQuestion ? 'Edit Question' : 'Add New Question'}</h3>
-                    <input
-                        type="text"
-                        placeholder="Title"
-                        value={newQuestion.title}
-                        onChange={(e) => setNewQuestion({ ...newQuestion, title: e.target.value })}
-                        required
-                        style={{ display: 'block', marginBottom: '10px', width: '400px' }}
-                    />
-                    <textarea
-                        placeholder="Description"
-                        value={newQuestion.description}
-                        onChange={(e) => setNewQuestion({ ...newQuestion, description: e.target.value })}
-                        required
-                        style={{ display: 'block', marginBottom: '10px', width: '400px', height: '100px' }}
-                    />
-                    <textarea
-                        placeholder="Starter Code"
-                        value={newQuestion.starterCode}
-                        onChange={(e) => setNewQuestion({ ...newQuestion, starterCode: e.target.value })}
-                        required
-                        style={{ display: 'block', marginBottom: '10px', width: '400px', height: '100px' }}
-                    />
+
+                    <input name="title" placeholder="Title" value={newQuestion.title} onChange={handleInputChange} required style={{ display: 'block', marginBottom: '10px', width: '400px' }} />
+                    <textarea name="description" placeholder="Description" value={newQuestion.description} onChange={handleInputChange} required style={{ display: 'block', marginBottom: '10px', width: '400px', height: '100px' }} />
+                    <input name="className" placeholder="Class Name" value={newQuestion.className} onChange={handleInputChange} required style={{ display: 'block', marginBottom: '10px', width: '400px' }} />
+                    <input name="methodName" placeholder="Method Name" value={newQuestion.methodName} onChange={handleInputChange} required style={{ display: 'block', marginBottom: '10px', width: '400px' }} />
+                    <input name="returnType" placeholder="Return Type" value={newQuestion.returnType} onChange={handleInputChange} required style={{ display: 'block', marginBottom: '10px', width: '400px' }} />
+                    <input name="parameters" placeholder="Parameters (comma separated)" value={newQuestion.parameters} onChange={handleInputChange} required style={{ display: 'block', marginBottom: '10px', width: '400px' }} />
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const paramList = newQuestion.parameters.split(',').map(p => p.trim());
+                            const starter = generateStarterCode(
+                                newQuestion.className,
+                                newQuestion.methodName,
+                                paramList,
+                                newQuestion.returnType
+                            );
+                            setNewQuestion(prev => ({ ...prev, starterCode: starter }));
+                        }}
+                        style={{ marginBottom: '10px' }}
+                    >
+                        ⚙️ Generate Starter Code
+                    </button>
+
+                    <textarea name="starterCode" placeholder="Starter Code" value={newQuestion.starterCode} onChange={handleInputChange} required style={{ display: 'block', marginBottom: '10px', width: '400px', height: '100px' }} />
 
                     <h4>Test Cases</h4>
                     {newQuestion.testCases.map((tc, idx) => (
                         <div key={idx} style={{ marginBottom: '10px' }}>
-                            <input
-                                type="text"
-                                placeholder="Input"
-                                value={tc.input}
-                                onChange={(e) => handleTestCaseChange(idx, 'input', e.target.value)}
-                                required
-                                style={{ marginRight: '10px' }}
-                            />
-                            <input
-                                type="text"
-                                placeholder="Output"
-                                value={tc.output}
-                                onChange={(e) => handleTestCaseChange(idx, 'output', e.target.value)}
-                                required
-                            />
+                            <input type="text" placeholder="Input" value={tc.input} onChange={(e) => handleTestCaseChange(idx, 'input', e.target.value)} required style={{ marginRight: '10px' }} />
+                            <input type="text" placeholder="Expected Output" value={tc.expectedOutput} onChange={(e) => handleTestCaseChange(idx, 'expectedOutput', e.target.value)} required />
                         </div>
                     ))}
                     <button type="button" onClick={addTestCaseField} style={{ marginBottom: '10px' }}>➕ Add Test Case</button>

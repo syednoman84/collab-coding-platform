@@ -12,6 +12,51 @@ public class Problem {
     private List<TestCase> testCases;
     private String starterCode;
 
+    private String methodSignature;
+    private String methodName;
+    private String className;
+    private String returnType;
+    private List<String> parameters;
+
+    public String getMethodSignature() {
+        return methodSignature;
+    }
+
+    public void setMethodSignature(String methodSignature) {
+        this.methodSignature = methodSignature;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
+    }
+
+    public List<String> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(List<String> parameters) {
+        this.parameters = parameters;
+    }
 
     // Getters and setters
     public int getId() {

@@ -1,37 +1,30 @@
 [ {
-  "id" : 3063,
-  "title" : "Fizz buzz",
-  "description" : "Fiz buz description",
-  "starterCode" : "import java.util.Scanner;\nimport java.io.InputStream;\nimport java.io.OutputStream;\nimport java.io.PrintWriter;\n\npublic class Solution {\n    public static void solve(InputStream in, OutputStream out) {\n// write your code here\n    }\n}",
+  "id" : 4877,
+  "title" : "Two Sum",
+  "description" : "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+  "starterCode" : "public class Solution {\n      public int[] twoSum(int[] arr, int val) {\n          // your code here\n      }\n  }",
   "testCases" : [ {
-    "input" : "1",
+    "input" : "[[2,7,11,15], 9]",
+    "expectedOutput" : "[0,1]"
+  } ],
+  "className" : "Solution",
+  "methodName" : "twoSum",
+  "returnType" : "int[]",
+  "parameters" : [ "int[] arr", "int val" ]
+}, {
+  "id" : 4935,
+  "title" : "Square Root",
+  "description" : "Given a non-negative integer x, return the square root of x rounded down to the nearest integer. The returned integer should be non-negative as well.\n\nYou must not use any built-in exponent function or operator.\n\n    For example, do not use pow(x, 0.5) in c++ or x ** 0.5 in python.\n\n \n\nExample 1:\n\nInput: x = 4\nOutput: 2\nExplanation: The square root of 4 is 2, so we return 2.\n\nExample 2:\n\nInput: x = 8\nOutput: 2\nExplanation: The square root of 8 is 2.82842..., and since we round it down to the nearest integer, 2 is returned.\n",
+  "starterCode" : "public class Solution {\n      public int mySqrt(int x) {\n          // your code here\n      }\n  }",
+  "testCases" : [ {
+    "input" : "[4]",
     "expectedOutput" : "2"
   }, {
-    "input" : "2",
-    "expectedOutput" : "3"
-  } ]
-}, {
-  "id" : 2852,
-  "title" : "Sum of two numbers",
-  "description" : "Write a program to add to numbers",
-  "starterCode" : "import java.util.Scanner;\nimport java.io.InputStream;\nimport java.io.OutputStream;\nimport java.io.PrintWriter;\n\npublic class Solution {\n    public static void solve(InputStream in, OutputStream out) {\n       \n    }\n}\n",
-  "testCases" : [ {
-    "input" : "2 3",
-    "expectedOutput" : "5"
-  }, {
-    "input" : "10 20",
-    "expectedOutput" : "30"
-  } ]
-}, {
-  "id" : 9846,
-  "title" : "Product of two numbers",
-  "description" : "Write a program to calculate product of two numbers",
-  "starterCode" : "import java.util.Scanner;\nimport java.io.InputStream;\nimport java.io.OutputStream;\nimport java.io.PrintWriter;\n\npublic class Solution {\n    public static void solve(InputStream in, OutputStream out) {\n    }\n}\n",
-  "testCases" : [ {
-    "input" : "2 3",
-    "expectedOutput" : "6"
-  }, {
-    "input" : "9 3",
-    "expectedOutput" : "27"
-  } ]
+    "input" : "[8]",
+    "expectedOutput" : "2"
+  } ],
+  "className" : "Solution",
+  "methodName" : "mySqrt",
+  "returnType" : "int",
+  "parameters" : [ "int x" ]
 } ]
