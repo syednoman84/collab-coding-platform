@@ -27,4 +27,99 @@
   "methodName" : "mySqrt",
   "returnType" : "int",
   "parameters" : [ "int x" ]
-} ]
+},
+  {
+    "id": 1001,
+    "title": "Sum of Integers",
+    "description": "Given a list of integers, return their sum.",
+    "starterCode": "public class Solution {\n    public int sum(List<Integer> nums) {\n        // your code here\n    }\n}",
+    "testCases": [
+      { "input": "[[1, 2, 3, 4]]", "expectedOutput": "10" },
+      { "input": "[[10, -5, 5]]", "expectedOutput": "10" }
+    ],
+    "className": "Solution",
+    "methodName": "sum",
+    "returnType": "int",
+    "parameters": ["List<Integer> nums"]
+  },
+  {
+    "id": 1002,
+    "title": "Reverse Strings",
+    "description": "Given a list of strings, return them in reverse order.",
+    "starterCode": "public class Solution {\n    public List<String> reverse(List<String> words) {\n        // your code here\n    }\n}",
+    "testCases": [
+      { "input": "[[\"a\", \"b\", \"c\"]]", "expectedOutput": "[\"c\",\"b\",\"a\"]" },
+      { "input": "[[\"one\"]]", "expectedOutput": "[\"one\"]" }
+    ],
+    "className": "Solution",
+    "methodName": "reverse",
+    "returnType": "List<String>",
+    "parameters": ["List<String> words"]
+  },
+  {
+    "id": 1003,
+    "title": "Double the Values",
+    "description": "Given a double array, return a new array with all values doubled.",
+    "starterCode": "public class Solution {\n    public double[] doubleValues(double[] nums) {\n        // your code here\n    }\n}",
+    "testCases": [
+      { "input": "[[1.0, 2.5, 3.5]]", "expectedOutput": "[2.0,5.0,7.0]" },
+      { "input": "[[0.0]]", "expectedOutput": "[0.0]" }
+    ],
+    "className": "Solution",
+    "methodName": "doubleValues",
+    "returnType": "double[]",
+    "parameters": ["double[] nums"]
+  },
+  {
+    "id": 2001,
+    "title": "Merge Word Counts",
+    "description": "Given two maps representing word counts, merge them by summing the counts for common words.",
+    "starterCode": "import java.util.*;\n\npublic class Solution {\n    public Map<String, Integer> mergeCounts(Map<String, Integer> a, Map<String, Integer> b) {\n        // your code here\n    }\n}",
+    "testCases": [
+      {
+        "input": "[{\"apple\":2,\"banana\":3}, {\"banana\":1,\"orange\":4}]",
+        "expectedOutput": "{\"apple\":2,\"banana\":4,\"orange\":4}"
+      }
+    ],
+    "className": "Solution",
+    "methodName": "mergeCounts",
+    "returnType": "Map<String,Integer>",
+    "parameters": ["Map<String,Integer> a", "Map<String,Integer> b"]
+  },
+  {
+    "id": 2002,
+    "title": "Max Key Length",
+    "description": "Given a map of string keys to integer values, return the length of the longest key.",
+    "starterCode": "import java.util.*;\n\npublic class Solution {\n    public int maxKeyLength(Map<String, Integer> map) {\n        // your code here\n    }\n}",
+    "testCases": [
+      {
+        "input": "[{\"a\":1,\"abcd\":2,\"abc\":5}]",
+        "expectedOutput": "4"
+      },
+      {
+        "input": "[{}]",
+        "expectedOutput": "0"
+      }
+    ],
+    "className": "Solution",
+    "methodName": "maxKeyLength",
+    "returnType": "int",
+    "parameters": ["Map<String,Integer> map"]
+  },
+  {
+    "id": 2003,
+    "title": "Filter Long Keys",
+    "description": "Given a map and an integer k, return a list of keys longer than k characters.",
+    "starterCode": "import java.util.*;\n\npublic class Solution {\n    public List<String> filterKeys(Map<String, Integer> map, int k) {\n        // your code here\n    }\n}",
+    "testCases": [
+      {
+        "input": "[{\"one\":1,\"banana\":2,\"kiwi\":3}, 4]",
+        "expectedOutput": "[\"banana\"]"
+      }
+    ],
+    "className": "Solution",
+    "methodName": "filterKeys",
+    "returnType": "List<String>",
+    "parameters": ["Map<String,Integer> map", "int k"]
+  }
+]

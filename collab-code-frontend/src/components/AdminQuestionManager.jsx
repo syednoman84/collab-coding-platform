@@ -25,6 +25,8 @@ export default function AdminQuestionManager() {
         testCases: [{ input: '', expectedOutput: '' }]
     });
     const [showForm, setShowForm] = useState(false);
+    const [activeProblemId, setActiveProblemId] = useState(null);
+
 
     useEffect(() => {
         fetchQuestions();
@@ -34,7 +36,13 @@ export default function AdminQuestionManager() {
         const res = await fetch(API_BASE_URL);
         const data = await res.json();
         setQuestions(data);
+
+        // fetch active question
+        const activeRes = await fetch(`${API_BASE_URL}/active`);
+        const activeData = await activeRes.json();
+        setActiveProblemId(activeData?.id || null);
     };
+
 
     const handleDelete = async (id) => {
         await fetch(`${API_BASE_URL}/${id}`, { method: 'DELETE' });
@@ -137,6 +145,19 @@ export default function AdminQuestionManager() {
         setNewQuestion(updated);
     }
 
+    const thStyle = {
+        border: '1px solid #ccc',
+        padding: '8px',
+        backgroundColor: '#f2f2f2',
+        textAlign: 'left'
+      };
+      
+      const tdStyle = {
+        border: '1px solid #ddd',
+        padding: '8px',
+        verticalAlign: 'top'
+      };
+      
     return (
         <div style={{ padding: '20px' }}>
             <h1>Admin Question Management</h1>
@@ -144,16 +165,37 @@ export default function AdminQuestionManager() {
             <button onClick={handleClearActive} style={{ marginBottom: '20px', marginLeft: '10px' }}>❌ Clear Active Question</button>
             <button onClick={handleAddNew} style={{ marginBottom: '20px' }}>Add New Question</button>
 
-            <ul>
-                {questions.map((q) => (
-                    <li key={q.id} style={{ marginBottom: '10px' }}>
-                        <strong>{q.title}</strong> - {q.description.substring(0, 50)}...
-                        <button onClick={() => handleEdit(q)} style={{ marginLeft: '10px' }}>✏️ Edit</button>
-                        <button onClick={() => handleDelete(q.id)} style={{ marginLeft: '10px' }}>🗑 Delete</button>
-                        <button onClick={() => handleActivate(q.id)} style={{ marginLeft: '10px' }}>🚀 Activate</button>
-                    </li>
-                ))}
-            </ul>
+            {/* Questions table starts */}
+            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+                <thead>
+                    <tr>
+                        <th style={thStyle}>#</th>
+                        <th style={thStyle}>Title</th>
+                        <th style={thStyle}>Description</th>
+                        <th style={thStyle}>Status</th>
+                        <th style={thStyle}>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {questions.map((q, index) => (
+                        <tr key={q.id} style={q.id === activeProblemId ? { backgroundColor: '#e6ffe6' } : {}}>
+                            <td style={tdStyle}>{index + 1}</td>
+                            <td style={tdStyle}>{q.title}</td>
+                            <td style={tdStyle}>{q.description.slice(0, 80)}...</td>
+                            <td style={tdStyle}>
+                                {q.id === activeProblemId && <span style={{ color: 'green', fontWeight: 'bold' }}>✅ Active</span>}
+                            </td>
+                            <td style={tdStyle}>
+                                <button onClick={() => handleEdit(q)} style={{ marginRight: '8px' }}>✏️ Edit</button>
+                                <button onClick={() => handleDelete(q.id)} style={{ marginRight: '8px' }}>🗑 Delete</button>
+                                <button onClick={() => handleActivate(q.id)}>🚀 Activate</button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            {/* Questions table ends */}
+
 
             {showForm && (
                 <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>

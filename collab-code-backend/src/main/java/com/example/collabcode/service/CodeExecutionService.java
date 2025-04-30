@@ -76,10 +76,17 @@ public class CodeExecutionService {
                 Object actual = method.invoke(instance, args);
 
                 String actualOutput = serializeOutput(actual);
-                String expected = normalizeJsonString(testCase.getExpectedOutput());
-                String actualNorm = normalizeJsonString(actualOutput);
+                boolean passed;
 
-                boolean passed = expected.equals(actualNorm);
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode expectedJson = mapper.readTree(testCase.getExpectedOutput());
+                    JsonNode actualJson = mapper.readTree(actualOutput);
+                    passed = expectedJson.equals(actualJson);
+                } catch (Exception e) {
+                    passed = testCase.getExpectedOutput().trim().equals(actualOutput.trim());
+                }
+
 
                 ExecutionResult.TestCaseResult tc = new ExecutionResult.TestCaseResult();
                 tc.setInput(testCase.getInput());
@@ -115,7 +122,8 @@ public class CodeExecutionService {
                 case "double" -> types.add(double.class);
                 case "double[]" -> types.add(double[].class);
                 case "boolean" -> types.add(boolean.class);
-                case "List<Integer>", "List<String>", "Map<String,Integer>" -> types.add(Object.class);
+                case "List<Integer>", "List<String>" -> types.add(List.class);
+                case "Map<String,Integer>" -> types.add(Map.class);
                 default -> throw new IllegalArgumentException("Unsupported param type: " + typeOnly);
             }
         }
