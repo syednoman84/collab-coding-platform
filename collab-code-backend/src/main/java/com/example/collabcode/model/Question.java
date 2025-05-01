@@ -14,6 +14,17 @@ public class Question {
     private String returnType;
     private List<String> parameters;
 
+    private boolean paired = true; // default to true
+
+    public boolean isPaired() {
+        return paired;
+    }
+
+    public void setPaired(boolean paired) {
+        this.paired = paired;
+    }
+
+
     public static class TestCase {
         private String input;
         private String expectedOutput;

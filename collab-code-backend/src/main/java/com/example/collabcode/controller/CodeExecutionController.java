@@ -1,5 +1,6 @@
 package com.example.collabcode.controller;
 
+import com.example.collabcode.auth.annotation.RequireAuth;
 import com.example.collabcode.model.CodeSubmission;
 import com.example.collabcode.model.ExecutionResult;
 import com.example.collabcode.service.CodeExecutionService;
@@ -16,6 +17,7 @@ public class CodeExecutionController {
         this.codeExecutionService = codeExecutionService;
     }
 
+    @RequireAuth
     @PostMapping("/execute")
     public ExecutionResult executeCode(@RequestBody CodeSubmission submission) {
         return codeExecutionService.executeCode(submission.getProblemId(), submission.getCode());

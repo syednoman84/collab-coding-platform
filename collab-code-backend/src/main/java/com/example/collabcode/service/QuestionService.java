@@ -100,4 +100,12 @@ public class QuestionService {
                 .orElse(null);
     }
 
+    public Question getQuestionById(int id) {
+        return questions.stream()
+                .filter(q -> q.getId() == id)
+                .findFirst()
+                .orElse(null);
+    }
+
+
 }

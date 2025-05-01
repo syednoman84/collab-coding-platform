@@ -1,5 +1,7 @@
 package com.example.collabcode.controller;
 
+import com.example.collabcode.auth.annotation.RequireAdmin;
+import com.example.collabcode.auth.annotation.RequireAuth;
 import com.example.collabcode.model.Question;
 import com.example.collabcode.service.QuestionService;
 import org.springframework.http.ResponseEntity;
@@ -23,39 +25,50 @@ public class QuestionController {
         this.messagingTemplate = messagingTemplate;
     }
 
+    @RequireAdmin
     @GetMapping
     public List<Question> getAllQuestions() {
         return questionService.getAllQuestions();
     }
 
+    @RequireAdmin
     @PostMapping
     public Question addQuestion(@RequestBody Question question) {
         return questionService.addQuestion(question);
     }
 
+    @RequireAdmin
     @PutMapping("/{id}")
     public Question updateQuestion(@PathVariable Integer id, @RequestBody Question question) {
         return questionService.updateQuestion(id, question);
     }
 
+    @RequireAdmin
     @DeleteMapping("/{id}")
     public void deleteQuestion(@PathVariable Integer id) {
         questionService.deleteQuestion(id);
     }
 
+    @RequireAdmin
     @PostMapping("/activate/{id}")
     public void activateQuestion(@PathVariable Integer id) {
         questionService.setActiveQuestionId(id);
-        messagingTemplate.convertAndSend("/topic/problem", Map.of("action", "start"));
+        Question q = questionService.getQuestionById(id);
+        messagingTemplate.convertAndSend("/topic/problem", Map.of(
+                "action", "start",
+                "paired", q != null && q.isPaired()
+        ));
+
     }
 
-
+    @RequireAdmin
     @PostMapping("/clear")
     public void clearActiveQuestion() {
         questionService.clearActiveQuestion();
         messagingTemplate.convertAndSend("/topic/problem", Map.of("action", "clear"));  // ✅ broadcast to users
     }
 
+    @RequireAuth
     @GetMapping("/active")
     public ResponseEntity<Question> getActiveQuestion() {
         Question active = questionService.getActiveQuestion();

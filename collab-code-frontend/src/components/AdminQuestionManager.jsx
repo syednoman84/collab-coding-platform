@@ -33,19 +33,19 @@ export default function AdminQuestionManager() {
     }, []);
 
     const fetchQuestions = async () => {
-        const res = await fetch(API_BASE_URL);
+        const res = await fetch(API_BASE_URL, { credentials: 'include' });
         const data = await res.json();
         setQuestions(data);
 
         // fetch active question
-        const activeRes = await fetch(`${API_BASE_URL}/active`);
+        const activeRes = await fetch(`${API_BASE_URL}/active`, {credentials: 'include'});
         const activeData = await activeRes.json();
         setActiveProblemId(activeData?.id || null);
     };
 
 
     const handleDelete = async (id) => {
-        await fetch(`${API_BASE_URL}/${id}`, { method: 'DELETE' });
+        await fetch(`${API_BASE_URL}/${id}`, { method: 'DELETE', credentials: 'include' });
         fetchQuestions();
     };
 
@@ -96,6 +96,7 @@ export default function AdminQuestionManager() {
         await fetch(url, {
             method,
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify(payload)
         });
         setShowForm(false);
@@ -113,12 +114,12 @@ export default function AdminQuestionManager() {
     };
 
     const handleActivate = async (id) => {
-        await fetch(`${API_BASE_URL}/activate/${id}`, { method: 'POST' });
+        await fetch(`${API_BASE_URL}/activate/${id}`, { method: 'POST', credentials: 'include' });
         alert('Question activated!');
     };
 
     const handleClearActive = async () => {
-        await fetch(`${API_BASE_URL}/clear`, { method: 'POST' });
+        await fetch(`${API_BASE_URL}/clear`, { method: 'POST', credentials: 'include' });
         alert('Active question cleared!');
     };
 
@@ -150,14 +151,14 @@ export default function AdminQuestionManager() {
         padding: '8px',
         backgroundColor: '#f2f2f2',
         textAlign: 'left'
-      };
-      
-      const tdStyle = {
+    };
+
+    const tdStyle = {
         border: '1px solid #ddd',
         padding: '8px',
         verticalAlign: 'top'
-      };
-      
+    };
+
     return (
         <div style={{ padding: '20px' }}>
             <h1>Admin Question Management</h1>

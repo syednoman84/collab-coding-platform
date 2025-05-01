@@ -167,3 +167,75 @@ public class Solution {
     }
 }
 ```
+
+
+# Test User and Admin Login
+
+    ✅ These commands save session cookies for authenticated follow-up requests.
+
+🔑 1. Admin Login (store session)
+
+curl -X POST http://localhost:8080/api/auth/login \
+  -c admin-cookies.txt \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin1", "password": "admin123"}'
+
+👤 2. User Login (store session)
+
+curl -X POST http://localhost:8080/api/auth/login \
+  -c user-cookies.txt \
+  -H "Content-Type: application/json" \
+  -d '{"username": "user1", "password": "user123"}'
+
+🔒 Test Protected Admin Endpoints
+🚀 3. Get All Questions (should work only for admin)
+
+curl -X GET http://localhost:8080/api/questions \
+  -b admin-cookies.txt
+
+❌ 4. Try Same as Normal User (should fail with 403)
+
+curl -X GET http://localhost:8080/api/questions \
+  -b user-cookies.txt
+
+📝 5. Add New Question (admin only)
+
+curl -X POST http://localhost:8080/api/questions \
+  -b admin-cookies.txt \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Sample Question",
+    "description": "Test description",
+    "starterCode": "public class Solution {}",
+    "className": "Solution",
+    "methodName": "dummy",
+    "returnType": "void",
+    "parameters": [],
+    "testCases": []
+  }'
+
+🚫 6. Same as Normal User (should fail)
+
+curl -X POST http://localhost:8080/api/questions \
+  -b user-cookies.txt \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "User Test",
+    "description": "Should not be allowed",
+    "starterCode": "public class Solution {}",
+    "className": "Solution",
+    "methodName": "dummy",
+    "returnType": "void",
+    "parameters": [],
+    "testCases": []
+  }'
+
+🌐 Public Endpoint — No Auth Required
+✅ 7. Get Active Question (accessible to all)
+
+curl -X GET http://localhost:8080/api/questions/active
+
+📤 Optional: Logout (clear session)
+
+curl -X POST http://localhost:8080/api/auth/logout \
+  -b admin-cookies.txt

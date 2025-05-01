@@ -1,9 +1,12 @@
 package com.example.collabcode.controller;
 
 import com.example.collabcode.service.SessionManager;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 import java.util.HashMap;
@@ -27,10 +30,18 @@ public class CodeSyncWebSocketController {
     }
 
     @MessageMapping("/user.join")
-    public void userJoin(Map<String, Object> payload) {
+    public void userJoin(Map<String, Object> payload, Message<?> message) {
+        System.out.println("Received join from: " + payload);
         String sessionId = (String) payload.get("sessionId");
         String userName = (String) payload.get("userName");
         Object problemIdObj = payload.get("problemId");
+
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+        String loggedInUser = (String) accessor.getSessionAttributes().get("username");
+
+        if (loggedInUser == null) {
+            throw new IllegalArgumentException("User must be logged in.");
+        }
 
         int problemId = -1;
         if (problemIdObj != null) {
@@ -65,6 +76,8 @@ public class CodeSyncWebSocketController {
             userMap.put("finalTime", session.finalTime);
             users.put(entry.getKey(), userMap);
         }
+        System.out.println("Broadcasting users: " + users);
+
         messagingTemplate.convertAndSend("/topic/users", users);
     }
 
