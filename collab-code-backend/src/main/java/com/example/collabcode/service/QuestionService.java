@@ -107,5 +107,11 @@ public class QuestionService {
                 .orElse(null);
     }
 
+    public void setPairedProgramming(int id, boolean paired) {
+        Question q = getQuestionById(id);
+        if (q != null) {
+            q.setPaired(paired);
+        }
+    }
 
 }

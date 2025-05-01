@@ -38,7 +38,7 @@ export default function AdminQuestionManager() {
         setQuestions(data);
 
         // fetch active question
-        const activeRes = await fetch(`${API_BASE_URL}/active`, {credentials: 'include'});
+        const activeRes = await fetch(`${API_BASE_URL}/active`, { credentials: 'include' });
         const activeData = await activeRes.json();
         setActiveProblemId(activeData?.id || null);
     };
@@ -113,10 +113,15 @@ export default function AdminQuestionManager() {
         setNewQuestion({ ...newQuestion, testCases: [...newQuestion.testCases, { input: '', expectedOutput: '' }] });
     };
 
-    const handleActivate = async (id) => {
-        await fetch(`${API_BASE_URL}/activate/${id}`, { method: 'POST', credentials: 'include' });
-        alert('Question activated!');
+    const handleActivate = async (id, paired) => {
+        await fetch(`${API_BASE_URL}/activate/${id}?paired=${paired}`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+        alert(`Question activated in ${paired ? 'Paired' : 'Isolated'} mode!`);
     };
+
+
 
     const handleClearActive = async () => {
         await fetch(`${API_BASE_URL}/clear`, { method: 'POST', credentials: 'include' });
@@ -187,9 +192,11 @@ export default function AdminQuestionManager() {
                                 {q.id === activeProblemId && <span style={{ color: 'green', fontWeight: 'bold' }}>✅ Active</span>}
                             </td>
                             <td style={tdStyle}>
-                                <button onClick={() => handleEdit(q)} style={{ marginRight: '8px' }}>✏️ Edit</button>
-                                <button onClick={() => handleDelete(q.id)} style={{ marginRight: '8px' }}>🗑 Delete</button>
-                                <button onClick={() => handleActivate(q.id)}>🚀 Activate</button>
+                                <button onClick={() => handleEdit(q)} style={{ marginRight: '8px' }}>✏️</button>
+                                <button onClick={() => handleDelete(q.id)} style={{ marginRight: '8px' }}>🗑</button>
+                                <button onClick={() => handleActivate(q.id, true)} title="Activate Paired">👥</button>
+                                <button onClick={() => handleActivate(q.id, false)} title="Activate Isolated">👤</button>
+
                             </td>
                         </tr>
                     ))}

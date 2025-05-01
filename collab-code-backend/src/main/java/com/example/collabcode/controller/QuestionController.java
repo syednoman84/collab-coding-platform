@@ -49,17 +49,31 @@ public class QuestionController {
         questionService.deleteQuestion(id);
     }
 
+//    @RequireAdmin
+//    @PostMapping("/activate/{id}")
+//    public void activateQuestion(@PathVariable Integer id) {
+//        questionService.setActiveQuestionId(id);
+//        Question q = questionService.getQuestionById(id);
+//        messagingTemplate.convertAndSend("/topic/problem", Map.of(
+//                "action", "start",
+//                "paired", q != null && q.isPaired()
+//        ));
+//
+//    }
+
     @RequireAdmin
     @PostMapping("/activate/{id}")
-    public void activateQuestion(@PathVariable Integer id) {
+    public void activateQuestion(@PathVariable Integer id, @RequestParam boolean paired) {
+        questionService.setPairedProgramming(id, paired);
         questionService.setActiveQuestionId(id);
+
         Question q = questionService.getQuestionById(id);
         messagingTemplate.convertAndSend("/topic/problem", Map.of(
                 "action", "start",
                 "paired", q != null && q.isPaired()
         ));
-
     }
+
 
     @RequireAdmin
     @PostMapping("/clear")

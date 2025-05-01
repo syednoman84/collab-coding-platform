@@ -15,6 +15,8 @@ export default function UserApp() {
   const [startTime, setStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [finalTime, setFinalTime] = useState(null);
+  const [pairedMode, setPairedMode] = useState(true); // default to true for backward compatibility
+
 
   useEffect(() => {
     if (!user) return;
@@ -51,29 +53,39 @@ export default function UserApp() {
       return v.toString(16);
     });
 
-  const handleCodeMessage = (newCode) => setCode(newCode);
+  const handleCodeMessage = (newCode) => {
+    if (pairedMode) {
+      setCode(newCode);
+    }
+  };
 
   const handleUsersUpdate = (userList) => {
     console.log("Received users:", userList);
-    setUsers(userList)};
-  
-    const handleCodeChange = (newCode) => {
-    setCode(newCode);
-    sendCodeSync(newCode);
+    setUsers(userList)
   };
 
-  const handleProblemEvents = ({ action }) => {
+  const handleCodeChange = (newCode) => {
+    setCode(newCode);
+    if (pairedMode) {
+      sendCodeSync(newCode);
+    }
+  };
+
+
+  const handleProblemEvents = ({ action, paired }) => {
     if (action === 'start') {
       fetchActiveProblem().then((res) => {
         setProblem(res || null);
         setStartTime(Date.now());
         setElapsedTime(0);
         setFinalTime(null);
+        setPairedMode(paired); // 👈 save paired flag from server
       });
     } else if (action === 'clear') {
       setProblem(null);
     }
   };
+
 
   const handleRun = async () => {
     if (!problem || !code.trim()) return alert('Please write some code before running.');
@@ -104,6 +116,9 @@ export default function UserApp() {
         <>
           <div style={{ marginBottom: '10px' }}>
             <h3>Time Elapsed: {finalTime != null ? formatTime(finalTime) : formatTime(elapsedTime)}</h3>
+            <h3>
+              Mode: {pairedMode ? 'Paired Programming' : 'Isolated Editor'}
+            </h3>
           </div>
           <div style={{ display: 'flex', gap: '20px' }}>
             <div style={{ flex: 3 }}>
