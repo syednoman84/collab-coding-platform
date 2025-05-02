@@ -1,4 +1,4 @@
-package com.example.collabcode.auth;
+package com.example.collabcode.auth.config;
 
 import com.example.collabcode.auth.annotation.RequireAdmin;
 import com.example.collabcode.auth.annotation.RequireAuth;

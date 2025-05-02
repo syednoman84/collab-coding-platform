@@ -1,6 +1,6 @@
 package com.example.collabcode.auth.config;
 
-import com.example.collabcode.auth.AuthInterceptor;
+import com.example.collabcode.auth.config.AuthInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.*;

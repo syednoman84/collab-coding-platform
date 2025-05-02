@@ -23,7 +23,7 @@ public class AuthHandshakeInterceptor implements HandshakeInterceptor {
         if (request instanceof ServletServerHttpRequest servletRequest) {
             HttpSession session = servletRequest.getServletRequest().getSession(false);
             if (session == null || session.getAttribute("username") == null) {
-                return false; // Reject unauthenticated WebSocket connection
+                return false;
             }
 
             attributes.put("username", session.getAttribute("username"));
@@ -39,5 +39,6 @@ public class AuthHandshakeInterceptor implements HandshakeInterceptor {
             ServerHttpResponse response,
             WebSocketHandler wsHandler,
             Exception ex) {
-        System.out.println("WebSocket handshake completed.");    }
+        System.out.println("WebSocket handshake completed.");
+    }
 }

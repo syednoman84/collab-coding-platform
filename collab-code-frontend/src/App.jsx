@@ -11,22 +11,17 @@ function ProtectedRoute({ children, role }) {
 
   if (!user) return <Navigate to="/login" />;
   if (role && user.role !== role) return <Navigate to="/" />;
-
-  // ✅ If no role restriction, redirect admin away from user app
-  if (!role && user.role === 'admin') {
-    return <Navigate to="/admin/questions" />;
-  }
+  if (!role && user.role === 'admin') return <Navigate to="/admin/questions" />;
 
   return children;
 }
-
 
 function NavBar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
@@ -47,34 +42,40 @@ function NavBar() {
   );
 }
 
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginSignupForm />} />
+
+      <Route
+        path="/admin/questions"
+        element={
+          <ProtectedRoute role="admin">
+            <NavBar />
+            <AdminQuestionManager />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/*"
+        element={
+          <ProtectedRoute>
+            <NavBar />
+            <UserApp />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
+}
+
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<LoginSignupForm />} />
-
-          <Route
-            path="/admin/questions"
-            element={
-              <ProtectedRoute role="admin">
-                <NavBar />
-                <AdminQuestionManager />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/*"
-            element={
-              <ProtectedRoute>
-                <NavBar />
-                <UserApp />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <Router>                  {/* ✅ Router is OUTSIDE AuthProvider */}
+      <AuthProvider>          {/* ✅ All routes inside Router context */}
+        <AppRoutes />
+      </AuthProvider>
+    </Router>
   );
 }

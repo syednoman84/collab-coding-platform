@@ -47,10 +47,9 @@ export function connectWebSocket(onCodeUpdate, onUsersUpdate, onProblemEvent) {
 
 export async function sendUserJoin(userName, problemId) {
   await connectedPromise; // ✅ wait for socket to be ready
-  const sessionId = sessionStorage.getItem('sessionId');
   stompClient.publish({
     destination: '/app/user.join',
-    body: JSON.stringify({ sessionId, userName, problemId }),
+    body: JSON.stringify({ userName, problemId }),
   });
 }
 
@@ -70,3 +69,13 @@ export async function sendUserSolved(finalTime) {
     body: JSON.stringify({ sessionId, finalTime }),
   });
 }
+
+export function disconnectWebSocket() {
+  if (stompClient && stompClient.connected) {
+    stompClient.deactivate(); // safer alternative than disconnect in some STOMP versions
+    console.log('WebSocket deactivated on logout.');
+    connectedPromise = null; // reset for future logins
+  }
+}
+
+
