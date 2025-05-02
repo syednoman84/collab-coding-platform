@@ -117,50 +117,49 @@ export default function UserApp() {
         path="/problem"
         element={
           problem ? (
-            <div className="App" style={{ padding: '20px' }}>
-              <h1>Collaborative Code Platform</h1>
-              <div style={{ marginBottom: '10px' }}>
-                <h3>
-                  Time Elapsed: {finalTime != null ? formatTime(finalTime) : formatTime(elapsedTime)}
-                </h3>
-                <h3>Mode: {pairedMode ? 'Paired Programming' : 'Isolated Editor'}</h3>
-              </div>
-              <div style={{ display: 'flex', gap: '20px' }}>
-                <div style={{ flex: 3 }}>
-                  <ProblemPanel problem={problem} />
-                  <CodeEditor code={code} setCode={handleCodeChange} />
-                  <button onClick={handleRun} style={{ marginTop: '10px' }}>Run Code</button>
-                  <OutputPanel output={output} />
-                </div>
-                <div
-                  style={{ flex: 1, border: '1px solid gray', padding: '10px', borderRadius: '8px' }}
-                >
-                  <h3>Participants</h3>
-                  <ul>
-                    {Object.entries(users).map(([sessionId, u]) => {
-                      const solved = u?.solved === true;
-                      const finalTime = typeof u?.finalTime === 'number' ? u.finalTime : null;
+<div className="App">
+  <h1>Collaborative Code Platform</h1>
+  <div className="panel">
+    <h3>Time Elapsed: {finalTime != null ? formatTime(finalTime) : formatTime(elapsedTime)}</h3>
+    <h3>Mode: {pairedMode ? 'Paired Programming' : 'Isolated Editor'}</h3>
+  </div>
+  <div style={{ display: 'flex', gap: '20px' }}>
+    <div style={{ flex: 3 }}>
+      <div className="panel">
+        <ProblemPanel problem={problem} />
+      </div>
+      <div className="panel">
+        <CodeEditor code={code} setCode={handleCodeChange} />
+        <button onClick={handleRun}>Run Code</button>
+        <OutputPanel output={output} />
+      </div>
+    </div>
+    <div className="participants" style={{ flex: 1 }}>
+      <h3>Participants</h3>
+      <ul>
+        {Object.entries(users).map(([sessionId, u]) => {
+          const solved = u?.solved === true;
+          const finalTime = typeof u?.finalTime === 'number' ? u.finalTime : null;
 
-                      return (
-                        <li key={sessionId}>
-                          {u?.userName || 'Unknown User'}
-                          {solved && (
-                            <>
-                              <span style={{ color: 'green', fontWeight: 'bold' }}> 🏆 SOLVED</span>
-                              {finalTime !== null && (
-                                <span style={{ marginLeft: '10px', color: 'blue' }}>
-                                  Time: {formatTime(finalTime)}
-                                </span>
-                              )}
-                            </>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              </div>
-            </div>
+          return (
+            <li key={sessionId}>
+              {u?.userName || 'Unknown User'}
+              {solved && (
+                <>
+                  <span className="solved"> 🏆 SOLVED</span>
+                  {finalTime !== null && (
+                    <span className="time">Time: {formatTime(finalTime)}</span>
+                  )}
+                </>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </div>
+</div>
+
           ) : (
             <Navigate to="/waiting" replace />
           )
