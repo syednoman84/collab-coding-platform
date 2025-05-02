@@ -44,12 +44,15 @@ export default function UserApp() {
         fetchActiveProblem().then((res) => {
           setProblem(res || null);
           setPairedMode(paired);
+          setOutput(null);
           resetTimer();
           startTimer();
           if (user?.role !== 'admin') navigate('/problem');
         });
-      } else if (action === 'clear') {
+      }
+      else if (action === 'clear') {
         setProblem(null);
+        setOutput(null); // ✅ Clear output when problem is cleared
         if (user?.role !== 'admin') navigate('/waiting');
       }
     },
