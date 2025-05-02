@@ -1,30 +1,32 @@
-/* styles.css */
+/* index.css - Dark gradient theme with electric blue buttons */
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #e0f7fa, #e1bee7);
+  background: linear-gradient(135deg, #000000, #1a1a1a);
   margin: 0;
   padding: 0;
+  color: #f0f0f0;
 }
 
 h1, h2, h3 {
-  color: #4a148c;
+  color: #01579b; /* Bright cyan */
 }
 
 button {
-  background-color: #6200ea;
-  color: white;
+  background-color: #01579b; /* Electric blue */
+  color: #ffffff;
   border: none;
   padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 1rem;
   margin-top: 10px;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 button:hover {
-  background-color: #3700b3;
+  background-color: #01579b;
+  transform: scale(1.03);
 }
 
 .App {
@@ -34,34 +36,59 @@ button:hover {
 }
 
 .panel {
-  background-color: white;
+  background-color: #1e1e2f;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.5);
   margin-bottom: 20px;
 }
 
 .participants {
-  background-color: #f3e5f5;
-  border: 1px solid #ba68c8;
+  background-color: #2a2a3b;
+  border: 1px solid #01579b;
   border-radius: 10px;
   padding: 16px;
 }
 
 .participants h3 {
-  color: #6a1b9a;
+  color: #01579b;
 }
 
 .participants li {
   margin-bottom: 8px;
+  color: #f0f0f0;
 }
 
 .solved {
-  color: green;
+  color: #76ff03; /* Neon green */
   font-weight: bold;
 }
 
 .time {
-  color: blue;
+  color: #82b1ff;
   margin-left: 10px;
+}
+
+.flex-row-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.upper-panel-text{
+  color: #f0f0f0;
+}
+
+.login-header {
+  /* height: 100vh; full screen height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /*background: linear-gradient(to right, #0f2027, #203a43, #2c5364); /* optional background */
+}
+
+.login-header h1 {
+  font-size: 3rem;
+  color: #01579b;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }

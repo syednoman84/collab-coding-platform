@@ -118,10 +118,10 @@ export default function UserApp() {
         element={
           problem ? (
 <div className="App">
-  <h1>Collaborative Code Platform</h1>
-  <div className="panel">
-    <h3>Time Elapsed: {finalTime != null ? formatTime(finalTime) : formatTime(elapsedTime)}</h3>
-    <h3>Mode: {pairedMode ? 'Paired Programming' : 'Isolated Editor'}</h3>
+  <h1>Welcome to Code Battle!</h1>
+  <div className="panel flex-row-between">
+    <h3 className="upper-panel-text">Time Elapsed: {finalTime != null ? formatTime(finalTime) : formatTime(elapsedTime)}</h3>
+    <h3 className="upper-panel-text">Mode: {pairedMode ? 'Paired Programming' : 'Isolated Editor'}</h3>
   </div>
   <div style={{ display: 'flex', gap: '20px' }}>
     <div style={{ flex: 3 }}>

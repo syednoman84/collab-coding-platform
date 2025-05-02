@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../auth/AuthContext'; 
+import { useAuth } from '../auth/AuthContext';
 
 export default function LoginSignupForm() {
   const { login, signup } = useAuth();
@@ -15,7 +15,7 @@ export default function LoginSignupForm() {
     const user = isSignup
       ? await signup(username, password)
       : await login(username, password);
-  
+
     if (!user) {
       setError('Authentication failed. Please try again.');
     } else {
@@ -26,10 +26,14 @@ export default function LoginSignupForm() {
       }
     }
   };
-  
+
 
   return (
     <div style={{ padding: '20px', maxWidth: '400px', margin: 'auto' }}>
+      <div className="login-header">
+        <h1>Code Battle</h1>
+      </div>
+
       <h2>{isSignup ? 'Sign Up' : 'Log In'}</h2>
       <form onSubmit={handleSubmit}>
         <input
