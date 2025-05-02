@@ -3,6 +3,11 @@ import { AuthProvider, useAuth } from './auth/AuthContext';
 import AdminQuestionManager from './components/AdminQuestionManager';
 import LoginSignupForm from './components/LoginSignupForm';
 import UserApp from './UserApp';
+import { useEffect, useState } from 'react';
+
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 function ProtectedRoute({ children, role }) {
   const { user, loading } = useAuth();
@@ -42,10 +47,42 @@ function NavBar() {
   );
 }
 
+function LoginRedirectWrapper() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [hasProblem, setHasProblem] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      fetch(`${API_BASE_URL}/api/questions/active`, { credentials: 'include' })
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          setHasProblem(!!data?.id);
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  if (loading) return <div>Loading...</div>;
+  if (user) {
+    return <Navigate to={hasProblem ? "/problem" : "/waiting"} replace />;
+  }
+
+  return <LoginSignupForm />;
+}
+
+
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/login" element={<LoginSignupForm />} />
+      <Route
+        path="/login"
+        element={
+          <LoginRedirectWrapper />
+        }
+      />
 
       <Route
         path="/admin/questions"

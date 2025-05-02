@@ -8,6 +8,7 @@ import ProblemPanel from './components/ProblemPanel';
 import CodeEditor from './components/CodeEditor';
 import OutputPanel from './components/OutputPanel';
 import WaitingPage from './components/WaitingPage';
+import LoginSignupForm from './components/LoginSignupForm';
 
 export default function UserApp() {
   const { user } = useAuth();
@@ -68,10 +69,9 @@ export default function UserApp() {
   useEffect(() => {
     if (problem?.starterCode) {
       setCode(problem.starterCode);
-      setPairedMode(problem.paired ?? true); // default to true for backward compatibility
+      setPairedMode(problem.paired ?? true);
     }
   }, [problem]);
-
 
   const handleRun = async () => {
     if (!problem || !code.trim()) return alert('Please write some code before running.');
@@ -99,54 +99,68 @@ export default function UserApp() {
 
   return (
     <Routes>
+      <Route
+        path="/login"
+        element={
+          user ? (
+            <Navigate to={problem ? '/problem' : '/waiting'} replace />
+          ) : (
+            <LoginSignupForm />
+          )
+        }
+      />
       <Route path="/waiting" element={<WaitingPage users={users} />} />
       <Route
         path="/problem"
         element={
-          <div className="App" style={{ padding: '20px' }}>
-            <h1>Collaborative Code Platform</h1>
-            <div style={{ marginBottom: '10px' }}>
-              <h3>
-                Time Elapsed: {finalTime != null ? formatTime(finalTime) : formatTime(elapsedTime)}
-              </h3>
-              <h3>Mode: {pairedMode ? 'Paired Programming' : 'Isolated Editor'}</h3>
-            </div>
-            <div style={{ display: 'flex', gap: '20px' }}>
-              <div style={{ flex: 3 }}>
-                <ProblemPanel problem={problem} />
-                <CodeEditor code={code} setCode={handleCodeChange} />
-                <button onClick={handleRun} style={{ marginTop: '10px' }}>Run Code</button>
-                <OutputPanel output={output} />
+          problem ? (
+            <div className="App" style={{ padding: '20px' }}>
+              <h1>Collaborative Code Platform</h1>
+              <div style={{ marginBottom: '10px' }}>
+                <h3>
+                  Time Elapsed: {finalTime != null ? formatTime(finalTime) : formatTime(elapsedTime)}
+                </h3>
+                <h3>Mode: {pairedMode ? 'Paired Programming' : 'Isolated Editor'}</h3>
               </div>
-              <div
-                style={{ flex: 1, border: '1px solid gray', padding: '10px', borderRadius: '8px' }}
-              >
-                <h3>Participants</h3>
-                <ul>
-                  {Object.entries(users).map(([sessionId, u]) => {
-                    const solved = u?.solved === true;
-                    const finalTime = typeof u?.finalTime === 'number' ? u.finalTime : null;
+              <div style={{ display: 'flex', gap: '20px' }}>
+                <div style={{ flex: 3 }}>
+                  <ProblemPanel problem={problem} />
+                  <CodeEditor code={code} setCode={handleCodeChange} />
+                  <button onClick={handleRun} style={{ marginTop: '10px' }}>Run Code</button>
+                  <OutputPanel output={output} />
+                </div>
+                <div
+                  style={{ flex: 1, border: '1px solid gray', padding: '10px', borderRadius: '8px' }}
+                >
+                  <h3>Participants</h3>
+                  <ul>
+                    {Object.entries(users).map(([sessionId, u]) => {
+                      const solved = u?.solved === true;
+                      const finalTime = typeof u?.finalTime === 'number' ? u.finalTime : null;
 
-                    return (
-                      <li key={sessionId}>
-                        {u?.userName || 'Unknown User'}
-                        {solved && (
-                          <>
-                            <span style={{ color: 'green', fontWeight: 'bold' }}> 🏆 SOLVED</span>
-                            {finalTime !== null && (
-                              <span style={{ marginLeft: '10px', color: 'blue' }}>
-                                Time: {formatTime(finalTime)}
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
+                      return (
+                        <li key={sessionId}>
+                          {u?.userName || 'Unknown User'}
+                          {solved && (
+                            <>
+                              <span style={{ color: 'green', fontWeight: 'bold' }}> 🏆 SOLVED</span>
+                              {finalTime !== null && (
+                                <span style={{ marginLeft: '10px', color: 'blue' }}>
+                                  Time: {formatTime(finalTime)}
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <Navigate to="/waiting" replace />
+          )
         }
       />
       <Route path="*" element={<Navigate to="/waiting" />} />
