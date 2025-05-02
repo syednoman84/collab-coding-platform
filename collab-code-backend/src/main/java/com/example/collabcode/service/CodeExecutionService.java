@@ -31,8 +31,8 @@ public class CodeExecutionService {
         List<String> errors = new ArrayList<>();
 
         Problem problem = problemService.getProblemById(problemId);
-        System.out.println("Problem ID received: " + problemId);
-        System.out.println("Available IDs: " + problemService.getAllProblems().stream().map(Problem::getId).toList());
+//        System.out.println("Problem ID received: " + problemId);
+//        System.out.println("Available IDs: " + problemService.getAllProblems().stream().map(Problem::getId).toList());
 
         if (problem == null) {
             result.setSuccess(false);

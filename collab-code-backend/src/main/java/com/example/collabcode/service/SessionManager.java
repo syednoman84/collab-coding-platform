@@ -51,7 +51,7 @@ public class SessionManager {
             users.put(entry.getKey(), userMap);
         }
 
-        System.out.println("Broadcasting users: " + users);
+//        System.out.println("Broadcasting users: " + users);
         messagingTemplate.convertAndSend("/topic/users", users);
     }
 

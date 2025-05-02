@@ -58,8 +58,8 @@ public class ProblemService {
                 problems.clear();
                 problems.addAll(loaded);
 
-                System.out.println("✅ Loaded " + problems.size() + " problems from questions.json");
-                System.out.println("✅ Loaded Problems: \n" + problems.get(0).getId());
+//                System.out.println("✅ Loaded " + problems.size() + " problems from questions.json");
+//                System.out.println("✅ Loaded Problems: \n" + problems.get(0).getId());
 
 
                 // ✅ Validate loaded problems (optional)

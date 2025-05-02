@@ -39,6 +39,6 @@ public class AuthHandshakeInterceptor implements HandshakeInterceptor {
             ServerHttpResponse response,
             WebSocketHandler wsHandler,
             Exception ex) {
-        System.out.println("WebSocket handshake completed.");
+//        System.out.println("WebSocket handshake completed.");
     }
 }
