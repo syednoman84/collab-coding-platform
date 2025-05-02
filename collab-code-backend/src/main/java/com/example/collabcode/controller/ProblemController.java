@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/problem")
-@CrossOrigin(origins = "http://localhost:5173") // Frontend Vite default port
+@CrossOrigin(origins = "http://192.168.1.196:5173") // Frontend Vite default port
 public class ProblemController {
 
     private final ProblemService problemService;

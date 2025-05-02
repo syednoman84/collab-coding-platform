@@ -1,13 +1,16 @@
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+
 let stompClient = null;
 let connectedPromise = null;
 
 export function connectWebSocket(onCodeUpdate, onUsersUpdate, onProblemEvent) {
   if (!connectedPromise) {
     connectedPromise = new Promise((resolve, reject) => {
-      const socket = new SockJS('http://192.168.1.196:8080/ws');
+      const socket = new SockJS(`${API_BASE_URL}/ws`);
 
       stompClient = new Client({
         webSocketFactory: () => socket,
@@ -16,7 +19,11 @@ export function connectWebSocket(onCodeUpdate, onUsersUpdate, onProblemEvent) {
             onCodeUpdate(message.body);
           });
           stompClient.subscribe('/topic/users', (message) => {
-            onUsersUpdate(JSON.parse(message.body));
+            if (message?.body) {
+              onUsersUpdate(JSON.parse(message.body));
+            } else {
+              console.warn("Empty message body received on /topic/users");
+            }
           });
           stompClient.subscribe('/topic/problem', (message) => {
             onProblemEvent(JSON.parse(message.body));

@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
@@ -7,7 +9,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://192.168.1.196:8080/api/auth/me', {
+    fetch(`${API_BASE_URL}/api/auth/me`, {
       credentials: 'include'
     })
       .then(res => res.ok ? res.json() : Promise.reject())
@@ -17,7 +19,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (username, password) => {
-    const res = await fetch('http://192.168.1.196:8080/api/auth/login', {
+    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -32,7 +34,7 @@ export function AuthProvider({ children }) {
   };
 
   const signup = async (username, password) => {
-    const res = await fetch('http://192.168.1.196:8080/api/auth/signup', {
+    const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -47,7 +49,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    await fetch('http://192.168.1.196:8080/api/auth/logout', {
+    await fetch(`${API_BASE_URL}/api/auth/logout`, {
       method: 'POST',
       credentials: 'include'
     });

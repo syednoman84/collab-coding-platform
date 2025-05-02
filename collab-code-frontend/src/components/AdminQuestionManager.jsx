@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const API_BASE_URL = 'http://192.168.1.196:8080/api/questions'; // Adjust to your backend URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function generateStarterCode(className, methodName, parameters, returnType) {
     const paramList = parameters.join(', ');
@@ -33,19 +33,19 @@ export default function AdminQuestionManager() {
     }, []);
 
     const fetchQuestions = async () => {
-        const res = await fetch(API_BASE_URL, { credentials: 'include' });
+        const res = await fetch(`${API_BASE_URL}/api/questions`, { credentials: 'include' });
         const data = await res.json();
         setQuestions(data);
 
         // fetch active question
-        const activeRes = await fetch(`${API_BASE_URL}/active`, { credentials: 'include' });
+        const activeRes = await fetch(`${API_BASE_URL}/api/questions/active`, { credentials: 'include' });
         const activeData = await activeRes.json();
         setActiveProblemId(activeData?.id || null);
     };
 
 
     const handleDelete = async (id) => {
-        await fetch(`${API_BASE_URL}/${id}`, { method: 'DELETE', credentials: 'include' });
+        await fetch(`${API_BASE_URL}/api/questions/${id}`, { method: 'DELETE', credentials: 'include' });
         fetchQuestions();
     };
 
@@ -82,7 +82,7 @@ export default function AdminQuestionManager() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const method = editingQuestion ? 'PUT' : 'POST';
-        const url = editingQuestion ? `${API_BASE_URL}/${editingQuestion.id}` : API_BASE_URL;
+        const url = editingQuestion ? `${API_BASE_URL}/api/questions/${editingQuestion.id}` : `${API_BASE_URL}/api/questions`;
         const payload = {
             ...newQuestion,
             parameters: newQuestion.parameters.split(',').map(p => p.trim()),
@@ -114,7 +114,7 @@ export default function AdminQuestionManager() {
     };
 
     const handleActivate = async (id, paired) => {
-        await fetch(`${API_BASE_URL}/activate/${id}?paired=${paired}`, {
+        await fetch(`${API_BASE_URL}/api/questions/activate/${id}?paired=${paired}`, {
             method: 'POST',
             credentials: 'include'
         });
@@ -124,7 +124,7 @@ export default function AdminQuestionManager() {
 
 
     const handleClearActive = async () => {
-        await fetch(`${API_BASE_URL}/clear`, { method: 'POST', credentials: 'include' });
+        await fetch(`${API_BASE_URL}/api/questions/clear`, { method: 'POST', credentials: 'include' });
         alert('Active question cleared!');
     };
 

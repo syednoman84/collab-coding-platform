@@ -1,7 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth/AuthContext';
-import AdminLogin from './components/AdminLogin';
-import AdminDashboard from './components/AdminDashboard';
 import AdminQuestionManager from './components/AdminQuestionManager';
 import LoginSignupForm from './components/LoginSignupForm';
 import UserApp from './UserApp';
@@ -10,11 +8,18 @@ function ProtectedRoute({ children, role }) {
   const { user, loading } = useAuth();
 
   if (loading) return <div>Loading...</div>;
+
   if (!user) return <Navigate to="/login" />;
   if (role && user.role !== role) return <Navigate to="/" />;
 
+  // ✅ If no role restriction, redirect admin away from user app
+  if (!role && user.role === 'admin') {
+    return <Navigate to="/admin/questions" />;
+  }
+
   return children;
 }
+
 
 function NavBar() {
   const { user, logout } = useAuth();
@@ -33,9 +38,7 @@ function NavBar() {
             Logged in as: <strong>{user.username}</strong> ({user.role})
           </span>
           {user.role === 'admin' && (
-            <>
-              <Link to="/admin/questions" style={{ marginRight: '10px' }}>Questions</Link>
-            </>
+            <Link to="/admin/questions" style={{ marginRight: '10px' }}>Questions</Link>
           )}
           <button onClick={handleLogout}>Logout</button>
         </>
@@ -50,14 +53,13 @@ export default function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<LoginSignupForm />} />
+
           <Route
             path="/admin/questions"
             element={
               <ProtectedRoute role="admin">
-                <>
-                  <NavBar />
-                  <AdminQuestionManager />
-                </>
+                <NavBar />
+                <AdminQuestionManager />
               </ProtectedRoute>
             }
           />
@@ -66,10 +68,8 @@ export default function App() {
             path="/*"
             element={
               <ProtectedRoute>
-                <>
-                  <NavBar />
-                  <UserApp />
-                </>
+                <NavBar />
+                <UserApp />
               </ProtectedRoute>
             }
           />

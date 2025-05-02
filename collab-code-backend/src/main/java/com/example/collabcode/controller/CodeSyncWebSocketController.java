@@ -32,9 +32,14 @@ public class CodeSyncWebSocketController {
     @MessageMapping("/user.join")
     public void userJoin(Map<String, Object> payload, Message<?> message) {
         System.out.println("Received join from: " + payload);
+
         String sessionId = (String) payload.get("sessionId");
         String userName = (String) payload.get("userName");
-        Object problemIdObj = payload.get("problemId");
+
+        if (sessionId == null || userName == null || userName.isBlank()) {
+            System.err.println("Invalid join payload. Skipping...");
+            return;
+        }
 
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         String loggedInUser = (String) accessor.getSessionAttributes().get("username");
@@ -44,7 +49,8 @@ public class CodeSyncWebSocketController {
         }
 
         int problemId = -1;
-        if (problemIdObj != null) {
+        Object problemIdObj = payload.get("problemId");
+        if (problemIdObj instanceof Number) {
             problemId = ((Number) problemIdObj).intValue();
         }
 

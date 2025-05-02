@@ -1,23 +1,25 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export default function AdminDashboard() {
   const [problems, setProblems] = useState([]);
 
   useEffect(() => {
-    axios.get('http://192.168.1.196:8080/api/problem/all')
+    axios.get(`${API_BASE_URL}/api/problem/all`)
       .then((res) => setProblems(res.data))
       .catch(console.error);
   }, []);
 
   const handleSelectProblem = (problemId) => {
-    axios.post('http://192.168.1.196:8080/api/admin/selectProblem', { problemId })
+    axios.post(`${API_BASE_URL}/api/admin/selectProblem`, { problemId })
       .then(() => alert('Problem started!'))
       .catch(console.error);
   };
 
   const handleClearProblem = () => {
-    axios.post('http://192.168.1.196:8080/api/admin/clearProblem')
+    axios.post(`${API_BASE_URL}/api/admin/clearProblem`)
       .then(() => alert('Problem cleared!'))
       .catch(console.error);
   };
