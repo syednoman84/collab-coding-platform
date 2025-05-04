@@ -10,6 +10,23 @@ import OutputPanel from './components/OutputPanel';
 import WaitingPage from './components/WaitingPage';
 import LoginSignupForm from './components/LoginSignupForm';
 
+useEffect(() => {
+  const handleKeyDown = (e) => {
+    const scrollAmount = 50; // pixels
+
+    if (e.key === 'ArrowDown') {
+      window.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+    } else if (e.key === 'ArrowUp') {
+      window.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  window.addEventListener('keydown', handleKeyDown);
+  return () => {
+    window.removeEventListener('keydown', handleKeyDown);
+  };
+}, []);
+
 export default function UserApp() {
   const { user } = useAuth();
   const navigate = useNavigate();
