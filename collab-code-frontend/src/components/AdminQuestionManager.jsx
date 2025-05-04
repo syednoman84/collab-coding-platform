@@ -154,7 +154,7 @@ export default function AdminQuestionManager() {
     const thStyle = {
         border: '1px solid #ccc',
         padding: '8px',
-        backgroundColor: '#f2f2f2',
+        backgroundColor: '#6ebe25',
         textAlign: 'left'
     };
 
@@ -166,9 +166,9 @@ export default function AdminQuestionManager() {
 
     return (
         <div style={{ padding: '20px' }}>
-            <h1>Admin Question Management</h1>
+            <h1>Admin Questions Management</h1>
 
-            <button onClick={handleClearActive} style={{ marginBottom: '20px', marginLeft: '10px' }}>❌ Clear Active Question</button>
+            <button onClick={handleClearActive} style={{ marginBottom: '20px', marginLeft: '10px', marginRight: '10px' }}>Clear Active Question</button>
             <button onClick={handleAddNew} style={{ marginBottom: '20px' }}>Add New Question</button>
 
             {/* Questions table starts */}
@@ -194,8 +194,8 @@ export default function AdminQuestionManager() {
                             <td style={tdStyle}>
                                 <button onClick={() => handleEdit(q)} style={{ marginRight: '8px' }}>✏️</button>
                                 <button onClick={() => handleDelete(q.id)} style={{ marginRight: '8px' }}>🗑</button>
-                                <button onClick={() => handleActivate(q.id, true)} title="Activate Paired">👥</button>
-                                <button onClick={() => handleActivate(q.id, false)} title="Activate Isolated">👤</button>
+                                <button onClick={() => handleActivate(q.id, true)} title="Activate Paired" style={{ marginRight: '8px' }}>👥</button>
+                                <button onClick={() => handleActivate(q.id, false)} title="Activate Isolated" style={{ marginRight: '8px' }}>👤</button>
 
                             </td>
                         </tr>

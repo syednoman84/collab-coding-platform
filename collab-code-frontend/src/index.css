@@ -9,11 +9,11 @@ body {
 }
 
 h1, h2, h3 {
-  color: #01579b; /* Bright cyan */
+  color: #6ebe25;
 }
 
 button {
-  background-color: #01579b; /* Electric blue */
+  background-color: #6ebe25; 
   color: #ffffff;
   border: none;
   padding: 10px 16px;
@@ -25,7 +25,7 @@ button {
 }
 
 button:hover {
-  background-color: #01579b;
+  background-color: #6ebe25;
   transform: scale(1.03);
 }
 
@@ -45,13 +45,13 @@ button:hover {
 
 .participants {
   background-color: #2a2a3b;
-  border: 1px solid #01579b;
+  border: 1px solid #6ebe25;
   border-radius: 10px;
   padding: 16px;
 }
 
 .participants h3 {
-  color: #01579b;
+  color: #6ebe25;
 }
 
 .participants li {
@@ -65,7 +65,7 @@ button:hover {
 }
 
 .time {
-  color: #82b1ff;
+  color: #6ebe25;
   margin-left: 10px;
 }
 
@@ -89,6 +89,26 @@ button:hover {
 
 .login-header h1 {
   font-size: 3rem;
-  color: #01579b;
+  color: #6ebe25;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
+
+.login-bg {
+  min-height: 100vh;
+  background-image: url('/bg1.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-container {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+

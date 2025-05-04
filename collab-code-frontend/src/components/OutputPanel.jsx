@@ -76,7 +76,7 @@ export default function OutputPanel({ output }) {
   return (
     <div style={{ backgroundColor: '#ffe6e6', padding: '10px', border: '1px solid red', marginTop: '20px' }}>
       <h4 style={{ color: 'red' }}>Errors:</h4>
-      <ul>
+      <ul style={{ color: 'red' }}>
         {output.errors?.length ? output.errors.map((e, idx) => <li key={idx}>{e}</li>) : <li>No specific error messages.</li>}
       </ul>
     </div>
@@ -86,7 +86,7 @@ export default function OutputPanel({ output }) {
 const thStyle = {
   border: '1px solid #ccc',
   padding: '8px',
-  backgroundColor: '#f2f2f2',
+  backgroundColor: '#6ebe25',
   textAlign: 'left'
 };
 

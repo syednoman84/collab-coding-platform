@@ -29,6 +29,9 @@ export default function LoginSignupForm() {
 
 
   return (
+    <div className="login-bg">
+  <div className="login-container">
+    <h1></h1>
     <div style={{ padding: '20px', maxWidth: '400px', margin: 'auto' }}>
       <div className="login-header">
         <h1>Code Battle</h1>
@@ -63,6 +66,8 @@ export default function LoginSignupForm() {
       >
         {isSignup ? 'Already have an account? Log In' : "Don't have an account? Sign Up"}
       </button>
+    </div>
+    </div>
     </div>
   );
 }

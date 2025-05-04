@@ -32,18 +32,21 @@ function NavBar() {
 
   return (
     <div style={{ padding: '10px', borderBottom: '1px solid #ccc', marginBottom: '20px' }}>
-      {user && (
-        <>
-          <span style={{ marginRight: '15px' }}>
-            Logged in as: <strong>{user.username}</strong> ({user.role})
-          </span>
-          {user.role === 'admin' && (
-            <Link to="/admin/questions" style={{ marginRight: '10px' }}>Questions</Link>
-          )}
-          <button onClick={handleLogout}>Logout</button>
-        </>
-      )}
+  {user && (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div>
+        <span style={{ marginRight: '15px' }}>
+          Logged in as: <strong>{user.username}</strong> ({user.role})
+        </span>
+        {user.role === 'admin' && (
+          <Link to="/admin/questions" style={{ marginRight: '10px' }}></Link>
+        )}
+      </div>
+      <button onClick={handleLogout}>Logout</button>
     </div>
+  )}
+</div>
+
     
   );
 }

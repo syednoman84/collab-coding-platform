@@ -121,7 +121,7 @@ export default function UserApp() {
   <h1>Welcome to Code Battle!</h1>
   <div className="panel flex-row-between">
     <h3 className="upper-panel-text">Time Elapsed: {finalTime != null ? formatTime(finalTime) : formatTime(elapsedTime)}</h3>
-    <h3 className="upper-panel-text">Mode: {pairedMode ? 'Paired Programming' : 'Isolated Editor'}</h3>
+    <h3 className="upper-panel-text">Mode: {pairedMode ? 'Paired' : 'Isolated'}</h3>
   </div>
   <div style={{ display: 'flex', gap: '20px' }}>
     <div style={{ flex: 3 }}>
