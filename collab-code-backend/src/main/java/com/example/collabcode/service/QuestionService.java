@@ -3,6 +3,7 @@ package com.example.collabcode.service;
 import com.example.collabcode.model.Question;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -12,29 +13,33 @@ import java.util.*;
 @Service
 public class QuestionService {
 
-    private static final String FILE_PATH = "data/questions.json";
-    private List<Question> questions = new ArrayList<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private Integer activeQuestionId = null;  // ✅ New field to track active question
+    private final List<Question> questions = new ArrayList<>();
+    private final String filePath;
+    private Integer activeQuestionId = null;
 
-    public QuestionService() {
+
+    public QuestionService(@Value("${questions.file.path}") String filePath) {
+        this.filePath = filePath;
         loadQuestions();
     }
 
     private void loadQuestions() {
         try {
-            File file = new File(FILE_PATH);
+            File file = new File(filePath);
             if (file.exists()) {
-                questions = objectMapper.readValue(file, new TypeReference<List<Question>>() {});
+                questions.addAll(objectMapper.readValue(file, new TypeReference<List<Question>>() {}));
+                System.out.println("LOADED QUESTIONS:");
+                System.out.println(questions.toString());
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void saveQuestions() {
+    public void saveQuestions() {
         try {
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(FILE_PATH), questions);
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(filePath), questions);
         } catch (IOException e) {
             e.printStackTrace();
         }

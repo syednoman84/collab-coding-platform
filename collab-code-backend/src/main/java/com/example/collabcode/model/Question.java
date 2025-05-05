@@ -24,6 +24,12 @@ public class Question {
         this.paired = paired;
     }
 
+    @Override
+    public String toString() {
+        return "\n" +
+                "id=" + id +
+                ", title='" + title;
+    }
 
     public static class TestCase {
         private String input;

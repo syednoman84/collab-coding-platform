@@ -4,6 +4,7 @@ import com.example.collabcode.model.Problem;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -17,9 +18,13 @@ import java.util.List;
 public class ProblemService {
 
     private final List<Problem> problems = new ArrayList<>();
-    private final Path filePath = Paths.get("data/questions.json");
+    private final Path filePath;
 
     private Integer activeProblemId = null;
+
+    public ProblemService(@Value("${questions.file.path}") String path) {
+        this.filePath = Paths.get(path);
+    }
 
     public Problem getProblemById(int id) {
         return problems.stream().filter(p -> p.getId() == id).findFirst().orElse(null);
