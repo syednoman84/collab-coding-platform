@@ -35,4 +35,14 @@ export async function fetchActiveProblem() {
   return null;
 }
 
+export async function notifyAdmin(problemTitle, code, testCases) {
+  const res = await fetch(`${API_BASE_URL}/api/notify-admin`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ problemTitle, code, testCases }),
+  });
+
+  return res.ok;
+}
 

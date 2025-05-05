@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { fetchActiveProblem, executeCode } from './api';
+import { fetchActiveProblem, executeCode, notifyAdmin } from './api';
 import { useCollaborativeSession } from './hooks/useCollaborativeSession';
 import { useCodeTimer } from './hooks/useCodeTimer';
 import { useAuth } from './auth/AuthContext';
@@ -10,22 +10,7 @@ import OutputPanel from './components/OutputPanel';
 import WaitingPage from './components/WaitingPage';
 import LoginSignupForm from './components/LoginSignupForm';
 
-useEffect(() => {
-  const handleKeyDown = (e) => {
-    const scrollAmount = 50; // pixels
-
-    if (e.key === 'ArrowDown') {
-      window.scrollBy({ top: scrollAmount, behavior: 'smooth' });
-    } else if (e.key === 'ArrowUp') {
-      window.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
-    }
-  };
-
-  window.addEventListener('keydown', handleKeyDown);
-  return () => {
-    window.removeEventListener('keydown', handleKeyDown);
-  };
-}, []);
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function UserApp() {
   const { user } = useAuth();
@@ -117,6 +102,46 @@ export default function UserApp() {
       ? ''
       : `${Math.floor(seconds / 60)} min ${seconds % 60} sec`;
 
+
+  const [emailSent, setEmailSent] = useState(false);
+
+  const handleNotify = async () => {
+    if (!problem || !output) return alert("Please run the code first.");
+
+    const testCases = output.testCaseResults?.map(tc => ({
+      input: tc.input,
+      expectedOutput: tc.expectedOutput,
+      actualOutput: tc.actualOutput,
+      passed: tc.passed,
+    })) || [];
+
+    const success = await notifyAdmin(problem.title, code, testCases);
+
+    if (success) {
+      setEmailSent(true);
+    } else {
+      alert("Failed to send email.");
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const scrollAmount = 50; // pixels
+
+      if (e.key === 'ArrowDown') {
+        window.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+      } else if (e.key === 'ArrowUp') {
+        window.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+
   return (
     <Routes>
       <Route
@@ -134,48 +159,58 @@ export default function UserApp() {
         path="/problem"
         element={
           problem ? (
-<div className="App">
-  <h1>Welcome to Code Battle!</h1>
-  <div className="panel flex-row-between">
-    <h3 className="upper-panel-text">Time Elapsed: {finalTime != null ? formatTime(finalTime) : formatTime(elapsedTime)}</h3>
-    <h3 className="upper-panel-text">Mode: {pairedMode ? 'Paired' : 'Isolated'}</h3>
-  </div>
-  <div style={{ display: 'flex', gap: '20px' }}>
-    <div style={{ flex: 3 }}>
-      <div className="panel">
-        <ProblemPanel problem={problem} />
-      </div>
-      <div className="panel">
-        <CodeEditor code={code} setCode={handleCodeChange} />
-        <button onClick={handleRun}>Run Code</button>
-        <OutputPanel output={output} />
-      </div>
-    </div>
-    <div className="participants" style={{ flex: 1 }}>
-      <h3>Participants</h3>
-      <ul>
-        {Object.entries(users).map(([sessionId, u]) => {
-          const solved = u?.solved === true;
-          const finalTime = typeof u?.finalTime === 'number' ? u.finalTime : null;
+            <div className="App">
+              <h1>Welcome to Code Battle!</h1>
+              <div className="panel flex-row-between">
+                <h3 className="upper-panel-text">Time Elapsed: {finalTime != null ? formatTime(finalTime) : formatTime(elapsedTime)}</h3>
+                <h3 className="upper-panel-text">Mode: {pairedMode ? 'Paired' : 'Isolated'}</h3>
+              </div>
+              <div style={{ display: 'flex', gap: '20px' }}>
+                <div style={{ flex: 3 }}>
+                  <div className="panel">
+                    <ProblemPanel problem={problem} />
+                  </div>
+                  <div className="panel">
+                    <CodeEditor code={code} setCode={handleCodeChange} />
+                    <button onClick={handleRun} style={{ marginRight: '10px' }}>Run Code</button>
+                    <button
+                      onClick={handleNotify}
+                      className="mt-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded"
+                    >
+                      Notify Admin
+                    </button>
+                    {emailSent && (
+                      <p className="mt-2 text-green-600 font-medium">✅ Email sent successfully!</p>
+                    )}
 
-          return (
-            <li key={sessionId}>
-              {u?.userName || 'Unknown User'}
-              {solved && (
-                <>
-                  <span className="solved"> 🏆 SOLVED</span>
-                  {finalTime !== null && (
-                    <span className="time">Time: {formatTime(finalTime)}</span>
-                  )}
-                </>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  </div>
-</div>
+                    <OutputPanel output={output} />
+                  </div>
+                </div>
+                <div className="participants" style={{ flex: 1 }}>
+                  <h3>Participants</h3>
+                  <ul>
+                    {Object.entries(users).map(([sessionId, u]) => {
+                      const solved = u?.solved === true;
+                      const finalTime = typeof u?.finalTime === 'number' ? u.finalTime : null;
+
+                      return (
+                        <li key={sessionId}>
+                          {u?.userName || 'Unknown User'}
+                          {solved && (
+                            <>
+                              <span className="solved"> 🏆 SOLVED</span>
+                              {finalTime !== null && (
+                                <span className="time">Time: {formatTime(finalTime)}</span>
+                              )}
+                            </>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+            </div>
 
           ) : (
             <Navigate to="/waiting" replace />
